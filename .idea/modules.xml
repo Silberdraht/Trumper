@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/VS2-master.iml" filepath="$PROJECT_DIR$/.idea/VS2-master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-redis-demo/demo.iml" filepath="$PROJECT_DIR$/spring-redis-demo/demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-web-demo/spring-web-demo.iml" filepath="$PROJECT_DIR$/spring-web-demo/spring-web-demo.iml" />
+    </modules>
+  </component>
+</project>
