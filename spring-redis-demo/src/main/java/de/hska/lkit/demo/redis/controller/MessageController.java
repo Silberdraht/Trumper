@@ -81,24 +81,28 @@ public class MessageController {
 	/**
 	 * add a new user, adds a list of all users to model
 	 * 
-	 * @param user
-	 *            User object filled in form
-	 * @param model
+	 * @param
+	 *
+	 * @param
 	 * @return
 	 */
 
 	@RequestMapping(value = "/addmessage", method = RequestMethod.GET)
 
-	public void postMessage(@ModelAttribute String message) {
+	public String postMessage(@ModelAttribute Message message) {
+
+		return "newMessage";
 	}
 
 
 
 	@RequestMapping(value = "/addmessage", method = RequestMethod.POST)
-	public void postMessage(@ModelAttribute String message, Model model) {
+	public String postMessage(@ModelAttribute Message message, Model model) {
 
-		messageRepository.postMessage(message);
-		model.addAttribute("message", "User successfully added");
+		messageRepository.postMessage("Test LOLZ");
+		model.addAttribute("Messages");
+		return "Messages";
+		//model.addAttribute("message", "Message successfully added");
 
 		//Map<String, User> retrievedUsers = userRepository.getAllUsers();
 

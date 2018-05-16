@@ -120,8 +120,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	 * hska.iwi.vslab.repo.UserRepository#saveUser(hska.iwi.vslab.model.User)
 	 */
 	//@Override
-	public void saveUser(User user) {
-	}
 
 
 	public MessageRepositoryImpl(String id) {
