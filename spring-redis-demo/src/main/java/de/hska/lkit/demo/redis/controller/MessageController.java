@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
-
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,60 +32,14 @@ public class MessageController {
 		this.messageRepository = messageRepository;
 	}
 
-	/**
-	 *
-	 * 
-	 * @param model
-	 * 
-	 * @return
-	 */
 
-	/**
-	@RequestMapping(value = "/users", method = RequestMethod.GET)
-	public String getAllUsers(Model model) {
-		Map<String, User> retrievedUsers = userRepository.getAllUsers();
-		model.addAttribute("users", retrievedUsers);
+	@RequestMapping(value = "/messages", method = RequestMethod.GET)
+	public String getAllMessages(Model model) {
 
-		return "users";
+		Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+		model.addAttribute("messages", retrievedMessages);
+		return "messages";
 	}
-*/
-	/**
-	 * get information for user with username
-	 * 
-	 * @param username
-	 *            username to find
-	 * @param model
-	 * @return
-	 */
-
-	/**
-	@RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
-	public String getOneUsers(@PathVariable("username") String username, Model model) {
-		User found = userRepository.getUser(username);
-
-		model.addAttribute("userFound", found);
-		return "oneUser";
-	}
-*/
-	/**
-	 * redirect to page to add a new user
-	 * 
-	 * @return
-	 */
-	/**
-	@RequestMapping(value = "/addmessage", method = RequestMethod.GET)
-	public String addUser(@ModelAttribute User user) {
-		return "newUser";
-	}
-
-	/**
-	 * add a new user, adds a list of all users to model
-	 * 
-	 * @param
-	 *
-	 * @param
-	 * @return
-	 */
 
 	@RequestMapping(value = "/addmessage", method = RequestMethod.GET)
 
@@ -99,17 +53,25 @@ public class MessageController {
 	@RequestMapping(value = "/addmessage", method = RequestMethod.POST)
 	public String postMessage(@ModelAttribute Message message, Model model) {
 
-		messageRepository.postMessage("Test LOLZ");
-		model.addAttribute("Messages");
-		return "Messages";
+		messageRepository.postMessage(message.getText());
+		model.addAttribute("messages");
+
+		Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+		model.addAttribute("messages", retrievedMessages);
+
+
+		return "messages";
 		//model.addAttribute("message", "Message successfully added");
 
 		//Map<String, User> retrievedUsers = userRepository.getAllUsers();
 
 		//model.addAttribute("users", retrievedUsers);
 	}
-	
-	
+
+
+
+
+
 	/**
 	 * search usernames containing the sequence of characters
 	 * 

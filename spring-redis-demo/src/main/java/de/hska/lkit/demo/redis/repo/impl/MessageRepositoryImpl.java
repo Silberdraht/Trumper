@@ -1,22 +1,18 @@
 package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
-import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
+import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.RedisZSetCommands.Range;
+import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.sql.Time;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /**
@@ -82,6 +78,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private ZSetOperations<String, String> srt_zSetOps;
 
 
+	private ListOperations<String, String> srt_listOps;
+
 
 
 
@@ -89,7 +87,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 	 * hash operations for redisTemplate
 	 */
 	@Resource(name="redisTemplate")
-	private HashOperations<String, String, User> rt_hashOps;
+	private HashOperations<String, String, Message> rt_hashOps;
 
 
 	/*
@@ -109,7 +107,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_setOps = stringRedisTemplate.opsForSet();
 		srt_zSetOps = stringRedisTemplate.opsForZSet();
 		srt_simpleOps = stringRedisTemplate.opsForValue();
-		//srt_listOps = stringRedisTemplate.opsForList();
+		srt_listOps = stringRedisTemplate.opsForList();
 	}
 
 	
@@ -128,43 +126,60 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	@Override
 	public Message getMessage(String id) {
-		return null;
+		Message message = new Message();
+		//System.out.println("getMessage");
+
+			//System.out.println("getMessage IF");
+			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
+			message.setAutor(srt_hashOps.get(id, "Autor"));
+			message.setText(srt_hashOps.get(id, "Inhalt"));
+
+
+		return message;
 	}
 
 	@Override
 	public void postMessage(String text) {
+
+		//unique id
+		String id = String.valueOf(m_id.incrementAndGet());
+
 		Message message = new Message();
 
 		message.setText(text);
 
 		//TO DO
-		message.setAutor("Default");
+		message.setAutor("Dummy Mc Dummyston");
 
-		//TO DO
-		message.setTimestamp("202815052018");
 
-		//TO DO
-		message.setId("m:1");
 
+		message.setId(id);
 
 		message.setDeleted("0");
 
-		//TO DO Generate unique id
-		String id = message.getId();
+
+		Object timeObject = redisTemplate.execute(RedisServerCommands::time);
+		message.setTimestamp(timeObject.toString());
+
+		Date time = new Date((long)timeObject);
+
+		message.setTimestamp(time.toString());
 
 
-		// to show how objects can be saved
-		// be careful, if username already exists it's not added another time
 
 		//Matze
-		String key = message.getId();
 
-		srt_hashOps.put(key, "id", id);
-		srt_hashOps.put(key, "Zeitstempel", message.getText());
+		String key = KEY_HASH_MESSAGE + id;
+		//System.out.print(key);
+				//message.getId();
+
+		//srt_hashOps.put(key, "id", id);
+		srt_hashOps.put(key, "Zeitstempel", message.getTimestamp());
 		srt_hashOps.put(key, "Autor", message.getAutor());
-		srt_hashOps.put(key, "Gelöscht", message.getDeleted());
+		srt_hashOps.put(key, "Geloescht", message.getDeleted());
 		srt_hashOps.put(key, "Inhalt", message.getText());
 
+		srt_listOps.rightPush(KEY_LIST_MESSAGE_GLOBAL, key);
 		// the key for a new user is added to the set for all usernames
 		//srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
 
@@ -181,17 +196,38 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 
 	@Override
-	public Map<String, Message> getAllMessages() {
+	public List<String> getAllMessages() {
 
+		/*
+		List list = srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
+		list.forEach(System.out::println);
+		*/
 
-		return null;
+		System.out.println("ICH ABERS");
+
+		return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
+
 	}
 
 	@Override
 	public Map<String, Message> getMessageGlobal() {
+		System.out.println("Map start");
+		Map<String, Message> mapResult = new HashMap<>();
+
+		for (String s: getAllMessages()) {
+
+			//System.out.println(s);
+			//System.out.println(getMessage(s));
+			mapResult.put(s, getMessage(s));
 
 
-		return null;
+			System.out.println(mapResult.get(s).toString());
+
+
+			//System.out.println("ICH WERDE AUFGERUFEN!!!!!!!!!!!!!!");
+		}
+
+		return mapResult;
 	}
 
 	@Override

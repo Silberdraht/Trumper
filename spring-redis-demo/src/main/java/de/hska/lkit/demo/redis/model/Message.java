@@ -1,6 +1,7 @@
 package de.hska.lkit.demo.redis.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Message implements Serializable {
 
@@ -9,6 +10,7 @@ public class Message implements Serializable {
     String autor;
     String deleted;
     String text;
+    List<String> messages;
 
 
     public Message() {}
@@ -50,4 +52,6 @@ public class Message implements Serializable {
     public void setText(String text) {
         this.text = text;
     }
+
+    public List<String> getMessages() {return messages;}
 }
