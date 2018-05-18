@@ -203,7 +203,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 		list.forEach(System.out::println);
 		*/
 
-		System.out.println("ICH ABERS");
+		//System.out.println("ICH ABERS");
 
 		return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
 
@@ -211,7 +211,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	@Override
 	public Map<String, Message> getMessageGlobal() {
-		System.out.println("Map start");
+		//System.out.println("Map start");
 		Map<String, Message> mapResult = new HashMap<>();
 
 		for (String s: getAllMessages()) {
@@ -221,7 +221,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 			mapResult.put(s, getMessage(s));
 
 
-			System.out.println(mapResult.get(s).toString());
+			//System.out.println(mapResult.get(s).toString());
 
 
 			//System.out.println("ICH WERDE AUFGERUFEN!!!!!!!!!!!!!!");
