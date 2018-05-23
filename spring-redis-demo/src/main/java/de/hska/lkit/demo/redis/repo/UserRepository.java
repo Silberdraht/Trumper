@@ -47,5 +47,9 @@ public interface UserRepository {
 
 
 	public String getUserCount();
-	
+
+	public String getIdByName(String name);
+
+	public String getPassword(String u_id);
+
 }

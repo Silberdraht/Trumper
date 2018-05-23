@@ -5,30 +5,31 @@ import java.io.Serializable;
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private String id;
-	private String username;
+	private String u_id;
+	private String online;
+	private String name;
 	private String password;
-	private String firstname;
-	private String lastname;
+	//private String firstname;
+	//private String lastname;
 
 	public User() {
 
 	}
 
 	public String getId() {
-		return id;
+		return u_id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setId(String u_id) {
+		this.u_id = u_id;
 	}
 
 	public String getUsername() {
-		return username;
+		return name;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(String name) {
+		this.name = name;
 	}
 
 	public String getPassword() {
@@ -39,20 +40,13 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	public String getFirstname() {
-		return firstname;
+	public String getOnline() {
+		return online;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+	public void setOnline(String firstname) {
+		this.online = online;
 	}
 
-	public String getLastname() {
-		return lastname;
-	}
-
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
 
 }

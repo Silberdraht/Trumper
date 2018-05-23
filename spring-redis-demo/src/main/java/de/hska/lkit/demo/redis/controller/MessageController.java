@@ -35,7 +35,7 @@ public class MessageController {
 
 	@RequestMapping(value = "/messages", method = RequestMethod.GET)
 	public String getAllMessages(Model model) {
-
+		System.out.println("Msg Rep wird aufgerufen");
 		Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
 		model.addAttribute("messages", retrievedMessages);
 		return "messages";

@@ -42,7 +42,7 @@ public class UserRepositoryImpl implements UserRepository {
 	/**
 	 * to generate unique ids for user
 	 */
-	private RedisAtomicLong userid;
+	private RedisAtomicLong u_id;
 	
 	
 
@@ -95,7 +95,7 @@ public class UserRepositoryImpl implements UserRepository {
 	public UserRepositoryImpl(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
 		this.redisTemplate = redisTemplate;
 		this.stringRedisTemplate = stringRedisTemplate;
-		this.userid = new RedisAtomicLong("userid", stringRedisTemplate.getConnectionFactory());
+		this.u_id = new RedisAtomicLong("u_id", stringRedisTemplate.getConnectionFactory());
 	}
 
 	
@@ -117,7 +117,7 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public void saveUser(User user) {
 		// generate a unique id
-		String id = String.valueOf(userid.incrementAndGet());
+		String id = String.valueOf(u_id.incrementAndGet());
 
 		user.setId(id);
 
@@ -126,10 +126,10 @@ public class UserRepositoryImpl implements UserRepository {
 
         //Matze
         srt_simpleOps.increment("user_count", 1);
-		String key = KEY_PREFIX_USER + user.getUsername();
-		srt_hashOps.put(key, "id", id);
-		srt_hashOps.put(key, "firstName", user.getFirstname());
-		srt_hashOps.put(key, "lastName", user.getLastname());
+		String key = KEY_PREFIX_USER + user.getId();
+		srt_hashOps.put(key, "u_id", id);
+		//srt_hashOps.put(key, "firstName", user.getFirstname());
+		//srt_hashOps.put(key, "lastName", user.getLastname());
 		srt_hashOps.put(key, "username", user.getUsername());
 		srt_hashOps.put(key, "password", user.getPassword());
 
@@ -143,9 +143,9 @@ public class UserRepositoryImpl implements UserRepository {
 		rt_hashOps.put(KEY_HASH_ALL_USERS, key, user);
 
         //srt_simpleOps.set("user_count", "1");
-        //
 
-
+		//Verbindet Username und Id
+		srt_simpleOps.set(user.getUsername(), user.getId());
 	}
 
 	@Override
@@ -164,8 +164,8 @@ public class UserRepositoryImpl implements UserRepository {
 			// get the user data out of the hash object with key "'user:' + username"
 			String key = "user:" + username;
 			user.setId(srt_hashOps.get(key, "id"));
-			user.setFirstname(srt_hashOps.get(key, "firstName"));
-			user.setLastname(srt_hashOps.get(key, "lastName"));
+			//user.setFirstname(srt_hashOps.get(key, "firstName"));
+			//user.setLastname(srt_hashOps.get(key, "lastName"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
 		} else
@@ -213,5 +213,17 @@ public class UserRepositoryImpl implements UserRepository {
 	public String getUserCount() {
 		return srt_simpleOps.get("user_count");
 	}
+
+	@Override
+	public String getIdByName(String name) {
+
+		return srt_simpleOps.get(name);
+	}
+
+	@Override
+	public String getPassword(String u_id) {
+		return srt_hashOps.get(KEY_PREFIX_USER + u_id, "password");
+	}
+
 
 }

@@ -2,6 +2,7 @@ package de.hska.lkit.demo.redis.controller;
 
 import java.util.Map;
 
+import de.hska.lkit.demo.redis.model.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,6 +42,26 @@ public class UserController {
 		model.addAttribute("users", retrievedUsers);
 
 		return "users";
+	}
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	public String getAllUsersLogin(@ModelAttribute User user) {
+		return "login";
+	}
+
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public String getAllUsersLogin(User user, Model model) {
+
+		Map<String, User> retrievedUsers = userRepository.getAllUsers();
+
+		if(user.getPassword().equalsIgnoreCase(userRepository.getPassword(userRepository.getIdByName(user.getUsername()) ))) {
+			System.out.println("Passwort if == true");
+			model.addAttribute("users", retrievedUsers);
+
+			return "messages";
+		}
+
+		model.addAttribute("users", retrievedUsers);
+		return "login";
 	}
 
 	/**
