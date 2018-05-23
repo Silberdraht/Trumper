@@ -1,3 +1,4 @@
+/**
 package de.hska.lkit.demo.redis.controller;
 
 import de.hska.lkit.demo.redis.model.Message;
@@ -20,6 +21,8 @@ import java.util.Map;
  * @author Lord_Silberdraht
  *
  */
+
+/**
 @Controller
 public class MessageController {
 
@@ -72,25 +75,9 @@ public class MessageController {
 
 
 
-	/**
-	 * search usernames containing the sequence of characters
-	 * 
-	 * @param user
-	 *            User object filled in form
-	 * @param model
-	 * @return
-	 */
-	/**
-	@RequestMapping(value = "/searchuser/{pattern}", method = RequestMethod.GET)
-	public String searchUser(@PathVariable("pattern") String pattern, @ModelAttribute User user, Model model) {
 
-		Map<String, User> retrievedUsers = userRepository.findUsersWith(pattern);
 
-		model.addAttribute("users", retrievedUsers);
-		return "users";
-	}
-	
-	*/
 	
 
 }
+*/
