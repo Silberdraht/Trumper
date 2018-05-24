@@ -52,4 +52,8 @@ public interface UserRepository {
 
 	public String getPassword(String u_id);
 
+	public String getAuthentification();
+	public void setAuthentification();
+	public void setCoockie();
+
 }

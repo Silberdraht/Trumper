@@ -1,9 +1,7 @@
 package de.hska.lkit.demo.redis.repo.impl;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.Charset;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -78,7 +76,6 @@ public class UserRepositoryImpl implements UserRepository {
 	private ZSetOperations<String, String> srt_zSetOps;
 
 
-
 	
 
 	/**
@@ -133,6 +130,9 @@ public class UserRepositoryImpl implements UserRepository {
 		srt_hashOps.put(key, "username", user.getUsername());
 		srt_hashOps.put(key, "password", user.getPassword());
 
+		//Generiere einen Authenfikiations Key und verbinde ihn mit dem User
+		srt_hashOps.put(key, "auth", generateAuth());
+
 		// the key for a new user is added to the set for all usernames
 		srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
 		
@@ -164,8 +164,6 @@ public class UserRepositoryImpl implements UserRepository {
 			// get the user data out of the hash object with key "'user:' + username"
 			String key = "user:" + username;
 			user.setId(srt_hashOps.get(key, "id"));
-			//user.setFirstname(srt_hashOps.get(key, "firstName"));
-			//user.setLastname(srt_hashOps.get(key, "lastName"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
 		} else
@@ -225,5 +223,41 @@ public class UserRepositoryImpl implements UserRepository {
 		return srt_hashOps.get(KEY_PREFIX_USER + u_id, "password");
 	}
 
+	@Override
+	public String getAuthentification() {
+		return null;
+	}
+
+	@Override
+	public void setAuthentification() {
+
+	}
+
+	@Override
+	public void setCoockie() {
+
+	}
+
+
+	private String generateAuth() {
+
+		String rnd = "K";
+
+		for (int i = 0; i <= 15; i++) {
+
+			double random = Math.random()*10;
+
+			rnd += (int)random;
+		}
+		//int random = (int)Math.random()*10;
+		//System.out.println(random);
+
+
+		System.out.println(rnd);
+
+
+
+		return rnd;
+	}
 
 }
