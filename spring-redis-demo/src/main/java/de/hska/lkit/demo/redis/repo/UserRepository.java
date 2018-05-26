@@ -1,6 +1,7 @@
 package de.hska.lkit.demo.redis.repo;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.hska.lkit.demo.redis.model.User;
 
@@ -52,8 +53,10 @@ public interface UserRepository {
 
 	public String getPassword(String u_id);
 
-	public String getAuthentification();
-	public void setAuthentification();
-	public void setCoockie();
+	public boolean auth(String uname, String pass);
+	public String addAuth(String uname, long timeout, TimeUnit tUnit);
+	public void deleteAuth(String uname);
+
+	public void setCookie();
 
 }

@@ -2,11 +2,13 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.data.redis.connection.RedisZSetCommands.Range;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
@@ -224,17 +226,38 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public String getAuthentification() {
-		return null;
+	public boolean auth(String uname, String pass) {
+
+		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		BoundHashOperations<String, String, String> userOps = stringRedisTemplate.boundHashOps(uid);
+		return userOps.get("password").equals(pass);
+
 	}
 
 	@Override
-	public void setAuthentification() {
+	public String addAuth(String uname, long timeout, TimeUnit tUnit) {
+		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		String auth = UUID.randomUUID().toString();
+		stringRedisTemplate.boundHashOps("uid:" + uid + ":auth").put("auth", auth);
+		stringRedisTemplate.expire("uid:" + uid + ":auth", timeout, tUnit);
+		stringRedisTemplate.opsForValue().set("auth:" + auth + ":uid", uid, timeout, tUnit);
+		return auth;
 
 	}
 
 	@Override
-	public void setCoockie() {
+	public void deleteAuth(String uname) {
+		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		String authKey = "uid:" + uid + ":auth";
+		String auth = (String) stringRedisTemplate.boundHashOps(authKey).get("auth");
+		List<String> keysToDelete = Arrays.asList(authKey, "auth:"+auth+":uid");
+		stringRedisTemplate.delete(keysToDelete);
+	}
+
+	@Override
+	public void setCookie() {
+
+
 
 	}
 

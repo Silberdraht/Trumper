@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -105,8 +107,11 @@ public class ControllerImpl {
             model.addAttribute("users", retrievedUsers);
             model.addAttribute("messages", retrievedMessages);
 
+
             return "messages";
         }
+        
+       
 
         model.addAttribute("users", retrievedUsers);
         return "login";
