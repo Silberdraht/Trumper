@@ -6,6 +6,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Service;
 
 
 @Configuration
@@ -18,6 +19,7 @@ public class RedisConfiguration {
 //		jRedisConnectionFactory.setPort(6379);
 //		jRedisConnectionFactory.setPassword("");
 //		return jRedisConnectionFactory;
+		System.out.println("DB Connection");
 		return new JedisConnectionFactory();
 	}
 
@@ -27,6 +29,7 @@ public class RedisConfiguration {
 		stringRedisTemplate.setKeySerializer(new StringRedisSerializer());
 		stringRedisTemplate.setHashValueSerializer(new StringRedisSerializer());
 		stringRedisTemplate.setValueSerializer(new StringRedisSerializer());
+		System.out.println("String Template");
 		return stringRedisTemplate;
 	}
 

@@ -1,41 +1,19 @@
-/**
-package de.hska.lkit.demo.redis.controller;
+
+package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.data.redis.connection.RedisZSetCommands.Range;
-import org.springframework.data.redis.core.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.data.redis.connection.RedisZSetCommands.Range;
-import org.springframework.data.redis.core.*;
-import org.springframework.data.redis.support.atomic.RedisAtomicLong;
-import org.springframework.stereotype.Repository;
-
-import de.hska.lkit.demo.redis.model.User;
-import de.hska.lkit.demo.redis.repo.UserRepository;
 
 
 public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
@@ -46,7 +24,8 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
     private StringRedisTemplate template;
 
 
-
+    @Resource(name = "redisTemplate")
+    private ValueOperations<String,String> srt_simpleOps;
 
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
@@ -64,9 +43,11 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                     if (auth != null) {
                         //System.out.println("CL auth != null");
 
-                        template.opsForHash().put("test", "hallo", "world");
-                        //String test = (String) template.opsForHash().get("user:1", "name");
+                        srt_simpleOps.set("schatz", "<3");
+                        //template.opsForValue().set("schatz", "<3");
+                        System.out.println("BLAAAAA");
 
+                        //
                         //System.out.println(test);
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
@@ -81,6 +62,4 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
         return true;
     }
 }
-
- */
 

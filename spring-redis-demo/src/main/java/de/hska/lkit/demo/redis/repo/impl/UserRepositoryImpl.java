@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
+import org.springframework.stereotype.Service;
 
 /**
  * @author knad0001
@@ -228,19 +229,34 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public boolean auth(String uname, String pass) {
 
-		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
-		BoundHashOperations<String, String, String> userOps = stringRedisTemplate.boundHashOps(uid);
+		System.out.println("auth wird aufgerufen");
+
+		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		String uid = getIdByName(uname);
+		System.out.println("uid: " + uid);
+
+		BoundHashOperations<String, String, String> userOps = stringRedisTemplate.boundHashOps(KEY_PREFIX_USER + uid);
+		System.out.println("Pass Bound HashOps");
 		return userOps.get("password").equals(pass);
 
 	}
 
 	@Override
 	public String addAuth(String uname, long timeout, TimeUnit tUnit) {
-		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+
+		System.out.println("Start addAuth");
+
+		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		String uid = getIdByName(uname);
+
 		String auth = UUID.randomUUID().toString();
-		stringRedisTemplate.boundHashOps("uid:" + uid + ":auth").put("auth", auth);
-		stringRedisTemplate.expire("uid:" + uid + ":auth", timeout, tUnit);
-		stringRedisTemplate.opsForValue().set("auth:" + auth + ":uid", uid, timeout, tUnit);
+		stringRedisTemplate.boundHashOps("uid:" + KEY_PREFIX_USER + uid + ":auth").put("auth", auth);
+		stringRedisTemplate.expire("uid:" + KEY_PREFIX_USER + uid + ":auth", timeout, tUnit);
+		System.out.println("auth:" + auth + ":uid");
+		stringRedisTemplate.opsForValue().set("auth:" + auth + ":uid", KEY_PREFIX_USER + uid, timeout, tUnit);
+
+		System.out.println("Pass addAuth");
+
 		return auth;
 
 	}

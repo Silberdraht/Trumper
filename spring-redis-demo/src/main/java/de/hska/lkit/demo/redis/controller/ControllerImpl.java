@@ -1,11 +1,12 @@
 package de.hska.lkit.demo.redis.controller;
 
 
+import java.time.Duration;
 import java.util.Map;
 
 import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,23 +15,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
-import de.hska.lkit.demo.redis.model.Message;
 
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Map;
+import javax.validation.Valid;
+import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
 public class ControllerImpl {
@@ -39,6 +32,7 @@ public class ControllerImpl {
     private final UserRepository userRepository;
     @Autowired
 
+    private static final Duration TIMEOUT = Duration.ofMinutes(15);
     public ControllerImpl(MessageRepository messageRepository,UserRepository userRepository) {
         super();
 
@@ -91,27 +85,52 @@ public class ControllerImpl {
         return "users";
     }
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getAllUsersLogin(@ModelAttribute User user) {
+    public String getAllUsersLogin(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+
+        SimpleCookieInterceptor simpleCookieInterceptor = new SimpleCookieInterceptor();
+
+        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
+
+        System.out.println(test);
+
+
+
+
         return "login";
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String getAllUsersLogin(User user, Model model) {
 
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, HttpServletResponse response, Model model) {
+
+
+
+        System.out.println("login Post wird aufgerufen");
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
         Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
 
+        System.out.println(user.getUsername());
+        System.out.println(user.getPassword());
 
-        if(user.getPassword().equalsIgnoreCase(userRepository.getPassword(userRepository.getIdByName(user.getUsername()) ))) {
+        if(userRepository.auth(user.getUsername(), user.getPassword())) {
             System.out.println("Passwort if == true");
-            model.addAttribute("users", retrievedUsers);
+            String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+            Cookie cookie = new Cookie("auth", auth);
+            response.addCookie(cookie);
+            model.addAttribute("user", user.getUsername());
+            //return "users/" + user.getName(); }
+
+
+             //model.addAttribute("user", new User());
+            //model.addAttribute("users", retrievedUsers);
             model.addAttribute("messages", retrievedMessages);
 
 
             return "messages";
         }
-        
-       
+
+
 
         model.addAttribute("users", retrievedUsers);
         return "login";
