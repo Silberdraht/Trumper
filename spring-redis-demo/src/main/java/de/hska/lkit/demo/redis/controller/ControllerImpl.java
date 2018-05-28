@@ -65,7 +65,7 @@ public class ControllerImpl {
         model.addAttribute("messages", retrievedMessages);
 
 
-        return "messages";
+        return "redirect:/messages?page=1";
         //model.addAttribute("message", "Message successfully added");
 
         //Map<String, User> retrievedUsers = userRepository.getAllUsers();
@@ -97,7 +97,7 @@ public class ControllerImpl {
             model.addAttribute("users", retrievedUsers);
             model.addAttribute("messages", retrievedMessages);
 
-            return "messages";
+            return "redirect:/messages?page=1";
         }
 
         model.addAttribute("users", retrievedUsers);
