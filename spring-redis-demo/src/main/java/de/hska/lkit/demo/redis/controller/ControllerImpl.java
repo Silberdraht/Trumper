@@ -41,6 +41,7 @@ public class ControllerImpl {
             }
             i+=1;
         }
+        model.addAttribute("current", page);
         model.addAttribute("messages", pagedMessages);
         int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
         model.addAttribute("size", pagesRequired);
