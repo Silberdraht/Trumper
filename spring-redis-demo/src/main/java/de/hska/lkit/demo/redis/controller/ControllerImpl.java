@@ -30,14 +30,16 @@ public class ControllerImpl {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final SimpleCookieInterceptor simpleCookieInterceptor;
     @Autowired
 
     private static final Duration TIMEOUT = Duration.ofMinutes(15);
-    public ControllerImpl(MessageRepository messageRepository,UserRepository userRepository) {
+    public ControllerImpl(MessageRepository messageRepository,UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
         super();
 
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+        this.simpleCookieInterceptor = simpleCookieInterceptor;
 
     }
 
@@ -87,7 +89,6 @@ public class ControllerImpl {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        SimpleCookieInterceptor simpleCookieInterceptor = new SimpleCookieInterceptor();
 
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
 

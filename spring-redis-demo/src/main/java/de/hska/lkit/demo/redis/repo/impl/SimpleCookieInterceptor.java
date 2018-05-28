@@ -15,7 +15,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
+@Repository
 public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
 
@@ -41,10 +41,10 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                     String auth = cookie.getValue();
                     System.out.println("Das Steht in Auth Cookie: " + auth);
                     if (auth != null) {
-                        //System.out.println("CL auth != null");
+                        System.out.println("CL auth != null");
 
-                        srt_simpleOps.set("schatz", "<3");
-                        //template.opsForValue().set("schatz", "<3");
+                        srt_simpleOps.set("test123", "123");
+
                         System.out.println("BLAAAAA");
 
                         //
