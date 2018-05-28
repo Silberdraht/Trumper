@@ -29,7 +29,7 @@ public class ControllerImpl {
 
     //", @RequestParam(defaultValue = "0") int page" was added in order to implement pageination -noah
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
-    public String getAllMessages(Model model, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int pagelength) {
+    public String getAllMessages(Model model,@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int pagelength) {
         System.out.println("Msg Rep wird aufgerufen");
         Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
         int i = 0;
