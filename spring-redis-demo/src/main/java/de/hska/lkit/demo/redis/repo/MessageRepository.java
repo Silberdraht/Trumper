@@ -5,9 +5,7 @@ import de.hska.lkit.demo.redis.model.Message;
 import java.util.List;
 import java.util.Map;
 
-public interface MessageRepository {
-
-
+public interface MessageRepository{
 
     public Message getMessage(String id);
 
@@ -18,7 +16,5 @@ public interface MessageRepository {
     public Map<String, Message> getMessageGlobal();
 
     public Map<String, Message> getMessageUser(String id);
-
-
 
 }

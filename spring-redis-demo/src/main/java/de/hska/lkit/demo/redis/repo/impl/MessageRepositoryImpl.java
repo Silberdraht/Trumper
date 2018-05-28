@@ -2,8 +2,6 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
-
-import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
@@ -12,7 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -234,4 +235,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	public Map<String, Message> getMessageUser(String id) {
 		return null;
 	}
+
+
 }

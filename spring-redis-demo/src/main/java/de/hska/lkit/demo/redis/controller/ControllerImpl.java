@@ -1,33 +1,15 @@
 package de.hska.lkit.demo.redis.controller;
 
 
-import java.util.Map;
-
 import de.hska.lkit.demo.redis.model.Message;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
 import de.hska.lkit.demo.redis.model.User;
-import de.hska.lkit.demo.redis.repo.UserRepository;
-import de.hska.lkit.demo.redis.model.Message;
-
 import de.hska.lkit.demo.redis.repo.MessageRepository;
-
+import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
-
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @org.springframework.stereotype.Controller
@@ -45,17 +27,27 @@ public class ControllerImpl {
 
     }
 
-
+    //", @RequestParam(defaultValue = "0") int page" was added in order to implement pageination -noah
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
-    public String getAllMessages(Model model) {
+    public String getAllMessages(Model model, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int pagelength) {
         System.out.println("Msg Rep wird aufgerufen");
         Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-        model.addAttribute("messages", retrievedMessages);
+        int i = 0;
+        int offset = (page-1)*pagelength;
+        Map<String,Message> pagedMessages = new HashMap<>();
+        for (Map.Entry<String, Message> entry : retrievedMessages.entrySet()) {
+            if (i >= offset && i < offset + pagelength) {
+                pagedMessages.put(entry.getKey(),entry.getValue());
+            }
+            i+=1;
+        }
+        model.addAttribute("messages", pagedMessages);
+        int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+        model.addAttribute("size", pagesRequired);
         return "messages";
     }
 
     @RequestMapping(value = "/addmessage", method = RequestMethod.GET)
-
     public String postMessage(@ModelAttribute Message message) {
 
         return "newMessage";
