@@ -87,17 +87,18 @@ public class ControllerImpl {
 
         return "users";
     }
+
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getAllUsersLogin(@ModelAttribute User user) throws Exception {
+    public String getAllUsersLogin(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
 //@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model
-//        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
-//        System.out.println(test);
+        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
+        System.out.println("login " + test);
 
 //        if (simpleCookieInterceptor.preHandle(request, response, model)) {
   //          return "logout";
     //    }
-
+        model.addAttribute("user", new User());
         return "login";
     }
 
@@ -114,7 +115,6 @@ public class ControllerImpl {
 
 
         if(userRepository.auth(user.getUsername(), user.getPassword())) {
-            System.out.println("Passwort if == true");
             String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
             Cookie cookie = new Cookie("auth", auth);
             response.addCookie(cookie);
@@ -124,16 +124,13 @@ public class ControllerImpl {
 
             //model.addAttribute("user", new User());
             //model.addAttribute("users", retrievedUsers);
-            model.addAttribute("messages", retrievedMessages);
+            //model.addAttribute("messages", retrievedMessages);
 
 
             return "logout";
         }
-        System.out.println("WTF");
 
-
-
-        //model.addAttribute("users", retrievedUsers);
+        //model.addAttribute("user", new User());
         return "login";
     }
 
@@ -201,7 +198,10 @@ public class ControllerImpl {
         return "users";
     }
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logoutGet() {
+    public String logoutGet(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+
+        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
+        System.out.println("logout " + test);
 
 
         return "logout"; }
@@ -214,9 +214,10 @@ public class ControllerImpl {
 
         if (SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
+            System.out.println("Logout prep deleteAuth für " + name);
             userRepository.deleteAuth(name);
         }
-        return "login"; }
+        return "logout"; }
 
 
 }

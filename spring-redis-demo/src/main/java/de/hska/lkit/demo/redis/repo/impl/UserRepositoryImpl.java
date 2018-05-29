@@ -252,7 +252,7 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public String addAuth(String uname, long timeout, TimeUnit tUnit) {
 
-		System.out.println("Start addAuth");
+		//System.out.println("Start addAuth");
 
 		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
 		String uid = getIdByName(uname);
@@ -260,22 +260,26 @@ public class UserRepositoryImpl implements UserRepository {
 		String auth = UUID.randomUUID().toString();
 		stringRedisTemplate.boundHashOps("uid:" + KEY_PREFIX_USER + uid + ":auth").put("auth", auth);
 		stringRedisTemplate.expire("uid:" + KEY_PREFIX_USER + uid + ":auth", timeout, tUnit);
+		System.out.println("uid:" + KEY_PREFIX_USER + uid + ":auth");
 		System.out.println("auth:" + auth + ":uid");
 		stringRedisTemplate.opsForValue().set("auth:" + auth + ":uid", KEY_PREFIX_USER + uid, timeout, tUnit);
 
 		System.out.println("Pass addAuth");
-
+		System.out.println("");
 		return auth;
 
 	}
 
 	@Override
 	public void deleteAuth(String uname) {
-		String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
+		System.out.println("Gelöscht wird id " + getIdByName(uname));
+		String uid = (KEY_PREFIX_USER + getIdByName(uname));
 		String authKey = "uid:" + uid + ":auth";
 		String auth = (String) stringRedisTemplate.boundHashOps(authKey).get("auth");
+		System.out.println(auth);
 		List<String> keysToDelete = Arrays.asList(authKey, "auth:"+auth+":uid");
 		stringRedisTemplate.delete(keysToDelete);
+		System.out.println("Delete done");
 	}
 
 	@Override
