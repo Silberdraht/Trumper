@@ -34,31 +34,33 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
         Cookie[] cookies = req.getCookies();
         if (!ObjectUtils.isEmpty(cookies))
-            System.out.println("first if");
+            //System.out.println("first if");
             for (Cookie cookie : cookies)
                 if (cookie.getName().equals("auth")) {
-                    System.out.println("if 1 CL");
+                    System.out.println(cookie.getName());
                     String auth = cookie.getValue();
                     System.out.println("Das Steht in Auth Cookie: " + auth);
                     if (auth != null) {
-                        System.out.println("CL auth != null");
+                        //System.out.println("CL auth != null");
 
-                        srt_simpleOps.set("test123", "123");
+                        //srt_simpleOps.set("test123", "123");
 
-                        System.out.println("BLAAAAA");
 
-                        //
                         //System.out.println(test);
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
-                        System.out.println(uid);
+                        //System.out.println(uid);
                         if (uid != null) {
                             System.out.println("uid != null");
-                            String name = (String) template.boundHashOps("uid:" + uid + ":user").get("name");
+                            //String name2 = (String) template.boundHashOps(uid).get("name");
+                            String name = (String) template.opsForHash().get(uid, "username");
+
                             SimpleSecurity.setUser(name, uid);
+
+                            System.out.println("prehandle done");
                         }
                     }
-                }
+                } else {return false;} //Falls kein Cookie existiert.
         return true;
     }
 }

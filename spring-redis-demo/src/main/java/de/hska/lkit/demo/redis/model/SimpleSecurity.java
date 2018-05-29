@@ -17,18 +17,19 @@ public abstract class SimpleSecurity {
     }
     public static boolean isUserSignedIn(String name) {
         UserInfo userInfo = user.get();
+        System.out.println(userInfo.name);
         return userInfo != null && userInfo.name.equals(name);
     }
     public static boolean isSignedIn() {
-        //to do
-        return false;
+        UserInfo userInfo = user.get();
+        return userInfo != null;
     }
     public static String getName() {
-        //to do
-        return null;
+        UserInfo userInfo = user.get();
+        return userInfo.name;
     }
     public static String getUid() {
-        //to do
-        return null;
+        UserInfo userInfo = user.get();
+        return userInfo.uid;
     }
 }

@@ -217,8 +217,12 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public String getIdByName(String name) {
+		if(srt_simpleOps.get(name) != null) {
 
-		return srt_simpleOps.get(name);
+			return srt_simpleOps.get(name);
+		} else
+
+			return null;
 	}
 
 	@Override
@@ -233,6 +237,10 @@ public class UserRepositoryImpl implements UserRepository {
 
 		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
 		String uid = getIdByName(uname);
+
+		if (uid == null) {
+			return false;
+		}
 		System.out.println("uid: " + uid);
 
 		BoundHashOperations<String, String, String> userOps = stringRedisTemplate.boundHashOps(KEY_PREFIX_USER + uid);
