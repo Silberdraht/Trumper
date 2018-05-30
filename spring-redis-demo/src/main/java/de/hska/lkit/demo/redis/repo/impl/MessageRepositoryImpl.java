@@ -1,6 +1,7 @@
 package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
 import org.apache.tomcat.util.log.SystemLogHandler;
@@ -37,7 +38,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_LIST_MESSAGE_GLOBAL = "m_global";
 
-	private static final String KEY_LIST_MESSAGE_USER = "m:user:";
+	private static final String KEY_LIST_MESSAGE_USER = "m:";
 
 	/**
 	 * to generate unique ids for message
@@ -148,8 +149,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		message.setText(text);
 
-		//TO DO
-		message.setAutor("Dummy Mc Dummyston");
+		message.setAutor(SimpleSecurity.getName());
 
 
 
@@ -180,6 +180,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_hashOps.put(key, "Inhalt", message.getText());
 
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_GLOBAL, key);
+
+		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
+		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
 		// the key for a new user is added to the set for all usernames
 		//srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
 

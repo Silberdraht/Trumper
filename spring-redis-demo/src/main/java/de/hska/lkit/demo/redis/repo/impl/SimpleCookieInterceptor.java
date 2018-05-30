@@ -59,10 +59,11 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                             SimpleSecurity.setUser(name, uid);
 
                             System.out.println("prehandle done");
+                            return true;
                         }
                     }
                 }
-        return true;
+        return false;
     }
 }
 

@@ -46,33 +46,43 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
-    public String getAllMessages(Model model) {
-        System.out.println("Msg Rep wird aufgerufen");
-        Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-        model.addAttribute("messages", retrievedMessages);
-        return "messages";
+    public String getAllMessages(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            model.addAttribute("messages", retrievedMessages);
+            return "messages";
+        }
+        return "login";
     }
 
     @RequestMapping(value = "/addmessage", method = RequestMethod.GET)
 
-    public String postMessage(@ModelAttribute Message message) {
+    public String postMessage(@ModelAttribute Message message, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
 
-        return "newMessage";
+            return "newMessage";
+        }
+        return "login";
     }
 
 
 
     @RequestMapping(value = "/addmessage", method = RequestMethod.POST)
-    public String postMessage(@ModelAttribute Message message, Model model) {
+    public String postMessage(@ModelAttribute Message message, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
-        messageRepository.postMessage(message.getText());
-        model.addAttribute("messages");
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+            messageRepository.postMessage(message.getText());
+            model.addAttribute("messages");
 
-        Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-        model.addAttribute("messages", retrievedMessages);
+            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            model.addAttribute("messages", retrievedMessages);
 
 
-        return "messages";
+            return "messages";
+        }
+
+        return "login";
         //model.addAttribute("message", "Message successfully added");
 
         //Map<String, User> retrievedUsers = userRepository.getAllUsers();
