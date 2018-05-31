@@ -18,16 +18,12 @@ import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.springframework.stereotype.Service;
 
-/**
- * @author knad0001
- *
- */
-/**
- * @author knad0001
- *
- */
+
+
 @Repository
 public class UserRepositoryImpl implements UserRepository {
+
+
 
 	/**
 	 * 
@@ -39,6 +35,10 @@ public class UserRepositoryImpl implements UserRepository {
 	private static final String KEY_HASH_ALL_USERS 		= "all:user";
 	
 	private static final String KEY_PREFIX_USER 	= "user:";
+
+	private static final String KEY_FOLLOWING_USER = "following:";
+
+	private static final String KEY_FOLLOWERS_USER = "followers:";
 
 	/**
 	 * to generate unique ids for user
@@ -283,11 +283,25 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public void setCookie() {
+	public void followUser(String u_id, String u_id2) {
+		//System.out.println("followUser Übergabe: " + u_id + " " + KEY_PREFIX_USER + u_id2);
+
+		System.out.println(KEY_FOLLOWING_USER + u_id + " " +KEY_PREFIX_USER + u_id2);
+		String key = KEY_FOLLOWING_USER + u_id;
+		String value = KEY_PREFIX_USER + u_id2;
 
 
+		redisTemplate.opsForSet().add(key, value);
+
+		System.out.println(redisTemplate.opsForSet().members(key));
 
 	}
+
+	@Override
+	public void unfollowUser(String u_id, String u_id2) {
+
+	}
+
 
 
 	private String generateAuth() {

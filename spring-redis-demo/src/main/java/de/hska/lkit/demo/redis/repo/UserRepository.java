@@ -53,10 +53,15 @@ public interface UserRepository {
 
 	public String getPassword(String u_id);
 
+
+
+	public void followUser(String u_id, String u_id2);
+	public void unfollowUser(String u_id, String u_id2);
+
+
 	public boolean auth(String uname, String pass);
 	public String addAuth(String uname, long timeout, TimeUnit tUnit);
 	public void deleteAuth(String uname);
 
-	public void setCookie();
 
 }

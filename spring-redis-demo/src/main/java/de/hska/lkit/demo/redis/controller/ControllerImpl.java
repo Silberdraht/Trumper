@@ -56,6 +56,17 @@ public class ControllerImpl {
         return "login";
     }
 
+    @RequestMapping(value = "/messagesFollow", method = RequestMethod.GET)
+    public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            model.addAttribute("messages", retrievedMessages);
+            return "messages";
+        }
+        return "login";
+    }
+
     @RequestMapping(value = "/addmessage", method = RequestMethod.GET)
 
     public String postMessage(@ModelAttribute Message message, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
@@ -83,12 +94,44 @@ public class ControllerImpl {
         }
 
         return "login";
-        //model.addAttribute("message", "Message successfully added");
-
-        //Map<String, User> retrievedUsers = userRepository.getAllUsers();
-
-        //model.addAttribute("users", retrievedUsers);
     }
+
+    @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
+
+    public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+
+        System.out.println("GET addFollow");
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            return "addFollow";
+        }
+
+        return "addFollow";
+    }
+
+    @RequestMapping(value = "/addfollow", method = RequestMethod.POST)
+    public String addFollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        System.out.println("Post addFollow");
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
+
+            /**
+            messageRepository.postMessage(message.getText());
+            model.addAttribute("messages");
+
+            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            model.addAttribute("messages", retrievedMessages);
+
+             */
+
+            return "addFollow";
+        }
+
+        return "login";
+    }
+
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public String getAllUsers(Model model) {

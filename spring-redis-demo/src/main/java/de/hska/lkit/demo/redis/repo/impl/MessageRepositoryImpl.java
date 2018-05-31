@@ -23,6 +23,7 @@ import java.util.*;
 @Repository
 public class MessageRepositoryImpl implements MessageRepository {
 
+
 	/**
 	 *
 	 */
@@ -232,6 +233,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		return mapResult;
 	}
+	//TO DO
+	@Override
+	public Map<String, Message> getMessageFollowed(String user) {
+		return null;
+	}
+
+
 
 	@Override
 	public Map<String, Message> getMessageUser(String id) {

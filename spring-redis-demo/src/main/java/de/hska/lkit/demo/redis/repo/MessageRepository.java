@@ -11,11 +11,14 @@ public interface MessageRepository {
 
     public Message getMessage(String id);
 
+
     public void postMessage(String text);
 
     public List<String> getAllMessages();
 
     public Map<String, Message> getMessageGlobal();
+
+    public Map<String, Message> getMessageFollowed(String user);
 
     public Map<String, Message> getMessageUser(String id);
 
