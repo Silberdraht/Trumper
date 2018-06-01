@@ -1,7 +1,10 @@
 package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
+
+import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
@@ -10,10 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -22,6 +22,7 @@ import java.util.Map;
  */
 @Repository
 public class MessageRepositoryImpl implements MessageRepository {
+
 
 	/**
 	 *
@@ -38,7 +39,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_LIST_MESSAGE_GLOBAL = "m_global";
 
-	private static final String KEY_LIST_MESSAGE_USER = "m:user:";
+	private static final String KEY_LIST_MESSAGE_USER = "m:";
 
 	/**
 	 * to generate unique ids for message
@@ -149,8 +150,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		message.setText(text);
 
-		//TO DO
-		message.setAutor("Dummy Mc Dummyston");
+		message.setAutor(SimpleSecurity.getName());
 
 
 
@@ -181,6 +181,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_hashOps.put(key, "Inhalt", message.getText());
 
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_GLOBAL, key);
+
+		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
+		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
 		// the key for a new user is added to the set for all usernames
 		//srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
 
@@ -230,11 +233,16 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		return mapResult;
 	}
+	//TO DO
+	@Override
+	public Map<String, Message> getMessageFollowed(String user) {
+		return null;
+	}
+
+
 
 	@Override
 	public Map<String, Message> getMessageUser(String id) {
 		return null;
 	}
-
-
 }

@@ -48,7 +48,32 @@
     <div class="container">
         <div class="panel panel-default">
             <div class="panel-heading"><h2>Global News Timeline</h2></div>
+    <!--
+            <div class="panel-body">
+                <form class="form" th:action="@{/addmessage}"
+                      th:object="${message}" method="post">
+                    <div class="form-group">
+                        <label>News: </label> <input type="text" th:field="*{text}" />
+                    </div>
 
+                    <button type="submit" class="btn btn-default">MAGA</button>
+                </form>
+            </div>
+    -->
+            <div class="panel panel-default" th:each="element : ${messages}">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="panel-heading"><h4 th:text="${element.value.autor}"></h4></div>
+                        <div class="panel-body" th:text="${element.value.text}"></div>
+                    </div>
+                    <div class="col-4">
+                        <div class="panel-footer" th:text="${element.value.timestamp}"></div>
+                    </div>
+                </div>
+
+            </div>
+
+<!--
             <table class="table">
                 <thead>
                 <tr>
@@ -65,13 +90,14 @@
                     </tr>
                 </tbody>
             </table>
-<!--
+--><!--
             <ul class="pagination">
                 <li class="page-item" th:each="i : ${#numbers.sequence(1,size)}">
                     <a th:href="@{/messages(page=${i})}" th:text="${i}" class="page-link"></a>
                 </li>
             </ul>
 -->
+
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <li class="page-item" th:classappend="${current-1 > 0 ? '' : ' disabled'}">
@@ -105,5 +131,7 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
 </body>
+
 </html>
