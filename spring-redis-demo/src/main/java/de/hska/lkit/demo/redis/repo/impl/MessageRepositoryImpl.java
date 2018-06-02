@@ -242,26 +242,40 @@ public class MessageRepositoryImpl implements MessageRepository {
 	//TO DO
 	@Override
 	public Map<String, Message> getMessageFollow(String user) {
-		/**
+
 		Map<String, Message> mapMassages = new HashMap<>();
-		Map<String, User> mapUser = new HashMap<>();
+		//Map<String, User> mapUser = new HashMap<>();
 		Set<String> setUser;
+		List<String> listMessage = null;
 		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
 
-		for (String i : setUser) {
-		mapMassages.put()
+		for (String id : setUser) {
+
+
+			listMessage.addAll(getMessageUser(id));
+		}
+
+		for (String s: listMessage) {
+			mapMassages.put(s, getMessage(s));
 
 		}
-	*/
 
 
-		return null;
+		return mapMassages;
 	}
 
 
 
 	@Override
-	public Map<String, Message> getMessageUser(String id) {
-		return null;
+	public List<String> getMessageUser(String id) {
+
+		//Map<String, Message> messageUser = new HashMap<>();
+			List<String> test = null;
+			System.out.println("SET Key" + KEY_HASH_MESSAGE + KEY_PREFIX_USER + id);
+
+			test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + KEY_PREFIX_USER + id, 0, -1));
+
+
+		return test;
 	}
 }

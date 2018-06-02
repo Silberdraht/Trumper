@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>List of ppl i follow</title>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- The above 3 meta tags *must* come first in the head -->
+	<link th:href="@{/webjars/bootstrap/3.3.4/css/bootstrap.min.css}"
+		  rel="stylesheet" media="screen" />
+</head>
+<body>
+<div class="container">
+
+	<h3>Good ppl i follow</h3>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th>Name</th>
+		</tr>
+		</thead>
+
+		<tbody>
+
+
+		<!-- <li th:each="item : ${messages.messages}" th:text="${item}">Item description here...</li>
+		-->
+
+		<tr th:each="element : ${users}">
+			<td th:text="${element.value.username}">Autor</td>
+		</tr>
+
+		<!--
+		<tr th:object="${messages}">
+			<td th:each="item : *{messages}" th:text="${timestamp}"> Beschreibung bla</td>
+		</tr>
+		-->
+
+		</tbody>
+	</table>
+
+</div>
+</body>
+</html>

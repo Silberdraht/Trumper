@@ -158,19 +158,22 @@ public class UserRepositoryImpl implements UserRepository {
 
 	
 	@Override
-	public User getUser(String username) {
+	public User getUser(String id) {
 		User user = new User();
 
 		// if username is in set for all usernames, 
-		if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, username)) {
-			
+		//if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, id)) {
+
+			System.out.println("isMember wird aufgerufen");
 			// get the user data out of the hash object with key "'user:' + username"
-			String key = "user:" + username;
+			String key = id;
 			user.setId(srt_hashOps.get(key, "id"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
+			/*
 		} else
 			user = null;
+			*/
 		return user;
 	}
 
@@ -228,6 +231,23 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public String getPassword(String u_id) {
 		return srt_hashOps.get(KEY_PREFIX_USER + u_id, "password");
+	}
+
+	@Override
+	public Map<String, User> getFollowing(String id) {
+
+		System.out.println("getFollowing wird auf gerufen mit " + id);
+		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + id);
+
+		Map<String, User> mapUser = new HashMap<>();
+
+		for (Object s : user) {
+			System.out.println("In der For-Schleife " + s.toString() + " getuser " + getUser(s.toString()));
+			mapUser.put(s.toString(), getUser(s.toString()));
+		}
+
+
+		return mapUser;
 	}
 
 	@Override
