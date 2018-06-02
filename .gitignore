@@ -10,3 +10,8 @@ buildNumber.properties
 .classpath
 .project
 .settings
+*.iws
+.idea/libraries
+.idea/tasks.xml
+.idea/vcs.xml
+.idea/workspace.xml
