@@ -2,8 +2,10 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
+import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
+import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
@@ -40,6 +42,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private static final String KEY_LIST_MESSAGE_GLOBAL = "m_global";
 
 	private static final String KEY_LIST_MESSAGE_USER = "m:";
+
+	private static final String KEY_FOLLOWING_USER = "following:";
 
 	/**
 	 * to generate unique ids for message
@@ -81,6 +85,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 
 	private ListOperations<String, String> srt_listOps;
+
+
 
 
 
@@ -235,7 +241,20 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 	//TO DO
 	@Override
-	public Map<String, Message> getMessageFollowed(String user) {
+	public Map<String, Message> getMessageFollow(String user) {
+		/**
+		Map<String, Message> mapMassages = new HashMap<>();
+		Map<String, User> mapUser = new HashMap<>();
+		Set<String> setUser;
+		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
+
+		for (String i : setUser) {
+		mapMassages.put()
+
+		}
+	*/
+
+
 		return null;
 	}
 
