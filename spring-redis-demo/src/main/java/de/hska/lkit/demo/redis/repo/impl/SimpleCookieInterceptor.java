@@ -44,9 +44,6 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                     if (auth != null) {
                         System.out.println("CL auth != null");
 
-
-
-                        //System.out.println(test);
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
 
@@ -60,14 +57,15 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                             System.out.println(uid);
                             SimpleSecurity.setUser(name, uid);
 
-                            System.out.println("prehandle done");
+                            System.out.println("10. prehandle done");
+                            //System.out.println();
+
                             return true;
                         }
                     }
                 }
 
-        return false;
-
+        return false; //return true;
     }
 }
 
