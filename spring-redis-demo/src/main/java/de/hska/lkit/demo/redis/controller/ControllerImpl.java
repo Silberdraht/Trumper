@@ -1,31 +1,23 @@
 package de.hska.lkit.demo.redis.controller;
 
 
-
-import java.time.Duration;
-import java.util.Map;
-
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
+import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.repo.MessageRepository;
+import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import de.hska.lkit.demo.redis.model.User;
-import de.hska.lkit.demo.redis.repo.UserRepository;
-
-import de.hska.lkit.demo.redis.repo.MessageRepository;
-
-
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -63,7 +55,7 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
         //System.out.println("Msg Rep wird aufgerufen");
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
             Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
             int i = 0;
             int offset = (page - 1) * pagelength;
@@ -81,6 +73,10 @@ public class ControllerImpl {
                 pagesRequired = 1;
             }
             model.addAttribute("size", pagesRequired);
+            return "messages";
+        }
+        return "redirect:/login";
+    }
 
 
     @RequestMapping(value = "/following", method = RequestMethod.GET)
@@ -186,7 +182,7 @@ public class ControllerImpl {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String getAllUsersLogin(Model model, @ModelAttribute User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
+    public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
 //@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
