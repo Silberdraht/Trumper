@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<title>List Messages Following</title>
+	<title>List of ppl i follow</title>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,14 +12,12 @@
 <body>
 <div class="container">
 
-	<h3>Trumps von gefolgten Usern</h3>
+	<h3>Good ppl i follow</h3>
 
 	<table class="table">
 		<thead>
 		<tr>
-			<th>Uhrzeit</th>
 			<th>Name</th>
-			<th>Text</th>
 		</tr>
 		</thead>
 
@@ -29,10 +27,8 @@
 		<!-- <li th:each="item : ${messages.messages}" th:text="${item}">Item description here...</li>
 		-->
 
-		<tr th:each="element : ${messages}">
-			<td th:text="${element.value.timestamp}">Zeit</td>
-			<td th:text="${element.value.autor}">Autor</td>
-			<td th:text="${element.value.text}">Text</td>
+		<tr th:each="element : ${users}">
+			<td th:text="${element.value.username}">Autor</td>
 		</tr>
 
 		<!--

@@ -1,23 +1,31 @@
 package de.hska.lkit.demo.redis.controller;
 
 
+
+import java.time.Duration;
+import java.util.Map;
+
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
-import de.hska.lkit.demo.redis.repo.MessageRepository;
-import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.repo.UserRepository;
+
+import de.hska.lkit.demo.redis.repo.MessageRepository;
+
+
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -73,18 +81,27 @@ public class ControllerImpl {
                 pagesRequired = 1;
             }
             model.addAttribute("size", pagesRequired);
-            return "messages";
+
+
+    @RequestMapping(value = "/following", method = RequestMethod.GET)
+    public String getAllFollowers(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, User> retrievedUsers = userRepository.getFollowing(SimpleSecurity.getUid());
+            model.addAttribute("users", retrievedUsers);
+            return "following";
         }
-        return "redirect:/login";
+        return "login";
     }
 
-    @RequestMapping(value = "/messagesFollow", method = RequestMethod.GET)
+    @RequestMapping(value = "/messagesfollow", method = RequestMethod.GET)
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            Map<String, Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
             model.addAttribute("messages", retrievedMessages);
-            return "messages";
+            return "messagesFollow";
+
         }
         return "login";
     }
@@ -113,10 +130,12 @@ public class ControllerImpl {
 
 
             return "redirect:/messages?page="+page;
+
         }
 
         return "login";
     }
+
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
 
@@ -128,6 +147,7 @@ public class ControllerImpl {
 
             return "addFollow";
         }
+
 
         return "addFollow";
     }
@@ -151,7 +171,9 @@ public class ControllerImpl {
             return "addFollow";
         }
 
-        return "redirect:/login";
+
+        return "login";
+
     }
 
 
@@ -181,6 +203,7 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
+
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
         System.out.println(send);
         if (send.equals("register")) {

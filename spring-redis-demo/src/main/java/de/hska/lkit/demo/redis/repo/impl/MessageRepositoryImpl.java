@@ -2,8 +2,11 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
+import de.hska.lkit.demo.redis.model.User;
+
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
+import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
@@ -40,6 +43,10 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private static final String KEY_LIST_MESSAGE_GLOBAL = "m_global";
 
 	private static final String KEY_LIST_MESSAGE_USER = "m:";
+
+
+	private static final String KEY_FOLLOWING_USER = "following:";
+
 
 	/**
 	 * to generate unique ids for message
@@ -81,6 +88,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 
 	private ListOperations<String, String> srt_listOps;
+
+
 
 
 
@@ -235,14 +244,42 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 	//TODO
 	@Override
-	public Map<String, Message> getMessageFollowed(String user) {
-		return null;
+
+	public Map<String, Message> getMessageFollow(String user) {
+
+		Map<String, Message> mapMassages = new HashMap<>();
+		//Map<String, User> mapUser = new HashMap<>();
+		Set<String> setUser;
+		List<String> listMessage = null;
+		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
+
+		for (String id : setUser) {
+
+
+			listMessage.addAll(getMessageUser(id));
+		}
+
+		for (String s: listMessage) {
+			mapMassages.put(s, getMessage(s));
+
+		}
+
+
+		return mapMassages;
 	}
 
 
 
 	@Override
-	public Map<String, Message> getMessageUser(String id) {
-		return null;
+	public List<String> getMessageUser(String id) {
+
+		//Map<String, Message> messageUser = new HashMap<>();
+			List<String> test = null;
+			System.out.println("SET Key" + KEY_HASH_MESSAGE + KEY_PREFIX_USER + id);
+
+			test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + KEY_PREFIX_USER + id, 0, -1));
+
+
+		return test;
 	}
 }

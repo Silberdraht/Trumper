@@ -158,19 +158,22 @@ public class UserRepositoryImpl implements UserRepository {
 
 	
 	@Override
-	public User getUser(String username) {
+	public User getUser(String id) {
 		User user = new User();
 
 		// if username is in set for all usernames, 
-		if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, username)) {
-			
+		//if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, id)) {
+
+			System.out.println("isMember wird aufgerufen");
 			// get the user data out of the hash object with key "'user:' + username"
-			String key = "user:" + username;
+			String key = id;
 			user.setId(srt_hashOps.get(key, "id"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
+			/*
 		} else
 			user = null;
+			*/
 		return user;
 	}
 
@@ -219,8 +222,10 @@ public class UserRepositoryImpl implements UserRepository {
 	public String getIdByName(String name) {
 		if(srt_simpleOps.get(name) != null) {
 
+
 			return srt_simpleOps.get(name);
 		} else
+
 
 			return null;
 	}
@@ -231,6 +236,43 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+
+	public Map<String, User> getFollowing(String id) {
+
+		System.out.println("getFollowing wird auf gerufen mit " + id);
+		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + id);
+
+		Map<String, User> mapUser = new HashMap<>();
+
+		for (Object s : user) {
+			System.out.println("In der For-Schleife " + s.toString() + " getuser " + getUser(s.toString()));
+			mapUser.put(s.toString(), getUser(s.toString()));
+		}
+
+
+		return mapUser;
+	}
+
+	@Override
+	public Map<String, User> getFollowers(String id) {
+
+		System.out.println("getFollowers wird auf gerufen mit " + id);
+		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + id);
+
+		Map<String, User> mapUser = new HashMap<>();
+
+		for (Object s : user) {
+			System.out.println("In der For-Schleife " + s.toString() + " getuser " + getUser(s.toString()));
+			mapUser.put(s.toString(), getUser(s.toString()));
+		}
+
+
+
+		return mapUser;
+	}
+
+	@Override
+
 	public boolean auth(String uname, String pass) {
 
 		System.out.println("auth wird aufgerufen");
@@ -293,7 +335,11 @@ public class UserRepositoryImpl implements UserRepository {
 
 		redisTemplate.opsForSet().add(key, value);
 
+		System.out.println("Add Followers " + KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2 + " " + u_id);
+		redisTemplate.opsForSet().add(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2, u_id);
+
 		System.out.println(redisTemplate.opsForSet().members(key));
+		System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2));
 
 	}
 
