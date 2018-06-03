@@ -1,6 +1,7 @@
 package de.hska.lkit.demo.redis.controller;
 
 
+
 import java.time.Duration;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 
 import de.hska.lkit.demo.redis.repo.MessageRepository;
+
 
 
 import javax.servlet.http.Cookie;
@@ -44,8 +46,9 @@ public class ControllerImpl {
 
     }
 
-
+    //", @RequestParam(defaultValue = "0") int page" was added in order to implement pageination -noah
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
+
     public String getAllMessages(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
@@ -74,6 +77,7 @@ public class ControllerImpl {
             Map<String, Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
             model.addAttribute("messages", retrievedMessages);
             return "messagesFollow";
+
         }
         return "login";
     }
@@ -85,7 +89,9 @@ public class ControllerImpl {
 
             return "newMessage";
         }
+
         return "login";
+
     }
 
 
@@ -101,11 +107,14 @@ public class ControllerImpl {
             model.addAttribute("messages", retrievedMessages);
 
 
+
             return "messages";
+
         }
 
         return "login";
     }
+
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
 
@@ -117,6 +126,7 @@ public class ControllerImpl {
 
             return "addFollow";
         }
+
 
         return "addFollow";
     }
@@ -140,7 +150,9 @@ public class ControllerImpl {
             return "addFollow";
         }
 
+
         return "login";
+
     }
 
 
@@ -170,7 +182,6 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, HttpServletResponse response, Model model) {
-
 
 
         System.out.println("login Post wird aufgerufen");

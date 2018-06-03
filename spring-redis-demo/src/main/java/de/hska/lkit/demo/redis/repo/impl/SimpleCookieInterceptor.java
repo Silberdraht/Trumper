@@ -32,6 +32,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
         System.out.println("Cookie preHandle wird aufgerufen");
 
+
         Cookie[] cookies = req.getCookies();
         if (!ObjectUtils.isEmpty(cookies))
             System.out.println("first if");
@@ -48,6 +49,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                         //System.out.println(test);
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
+
                         System.out.println("uid durch cookie " + uid);
                         if (uid != null) {
                             System.out.println("uid != null");
@@ -63,7 +65,9 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                         }
                     }
                 }
+
         return false;
+
     }
 }
 
