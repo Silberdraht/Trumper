@@ -1,23 +1,31 @@
 package de.hska.lkit.demo.redis.controller;
 
 
+
+import java.time.Duration;
+import java.util.Map;
+
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
-import de.hska.lkit.demo.redis.repo.MessageRepository;
-import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.repo.UserRepository;
+
+import de.hska.lkit.demo.redis.repo.MessageRepository;
+
+
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -40,37 +48,36 @@ public class ControllerImpl {
 
     //", @RequestParam(defaultValue = "0") int page" was added in order to implement pageination -noah
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
-    public String getAllMessages(Model model, HttpServletResponse response, HttpServletRequest request,
-                                 @RequestParam(defaultValue = "1") int page,
-                                 @RequestParam(defaultValue = "5") int pagelength) throws Exception {
-        //System.out.println("Msg Rep wird aufgerufen");
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-            int i = 0;
-            int offset = (page - 1) * pagelength;
-            Map<String, Message> pagedMessages = new HashMap<>();
-            for (Map.Entry<String, Message> entry : retrievedMessages.entrySet()) {
-                if (i >= offset && i < offset + pagelength) {
-                    pagedMessages.put(entry.getKey(), entry.getValue());
-                }
-                i += 1;
-            }
-            model.addAttribute("current", page);
-            model.addAttribute("messages", pagedMessages);
-            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
-            model.addAttribute("size", pagesRequired);
-            return "messages";
-        }
-        return "redirect:/login";
-    }
 
-    @RequestMapping(value = "/messagesFollow", method = RequestMethod.GET)
-    public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+    public String getAllMessages(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
             Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
             model.addAttribute("messages", retrievedMessages);
             return "messages";
+        }
+        return "login";
+    }
+
+    @RequestMapping(value = "/following", method = RequestMethod.GET)
+    public String getAllFollowers(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, User> retrievedUsers = userRepository.getFollowing(SimpleSecurity.getUid());
+            model.addAttribute("users", retrievedUsers);
+            return "following";
+        }
+        return "login";
+    }
+
+    @RequestMapping(value = "/messagesfollow", method = RequestMethod.GET)
+    public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
+            model.addAttribute("messages", retrievedMessages);
+            return "messagesFollow";
+
         }
         return "login";
     }
@@ -82,7 +89,9 @@ public class ControllerImpl {
 
             return "newMessage";
         }
-        return "redirect:/login";
+
+        return "login";
+
     }
 
 
@@ -98,11 +107,14 @@ public class ControllerImpl {
             model.addAttribute("messages", retrievedMessages);
 
 
-            return "redirect:/messages?page=1";
+
+            return "messages";
+
         }
 
         return "login";
     }
+
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
 
@@ -114,6 +126,7 @@ public class ControllerImpl {
 
             return "addFollow";
         }
+
 
         return "addFollow";
     }
@@ -137,7 +150,9 @@ public class ControllerImpl {
             return "addFollow";
         }
 
-        return "redirect:/login";
+
+        return "login";
+
     }
 
 
@@ -167,7 +182,6 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, HttpServletResponse response, Model model) {
-
 
 
         System.out.println("login Post wird aufgerufen");

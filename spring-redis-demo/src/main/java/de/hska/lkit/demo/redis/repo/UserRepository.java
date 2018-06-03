@@ -1,5 +1,9 @@
 package de.hska.lkit.demo.redis.repo;
 
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import de.hska.lkit.demo.redis.model.User;
 
 import java.util.Map;
@@ -53,6 +57,9 @@ public interface UserRepository {
 
 	public String getPassword(String u_id);
 
+
+	public Map<String, User> getFollowing(String id);
+	public Map<String, User> getFollowers(String id);
 
 
 	public void followUser(String u_id, String u_id2);
