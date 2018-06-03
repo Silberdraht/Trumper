@@ -242,7 +242,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		return mapResult;
 	}
-	//TO DO
+	//TODO
 	@Override
 
 	public Map<String, Message> getMessageFollow(String user) {
