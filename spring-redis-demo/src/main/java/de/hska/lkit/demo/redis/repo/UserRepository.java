@@ -54,6 +54,7 @@ public interface UserRepository {
 	public String getPassword(String u_id);
 
 	public Map<String, User> getFollowing(String id);
+	public Map<String, User> getFollowers(String id);
 
 	public void followUser(String u_id, String u_id2);
 	public void unfollowUser(String u_id, String u_id2);
