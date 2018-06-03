@@ -67,6 +67,17 @@ public class ControllerImpl {
         return "login";
     }
 
+    @RequestMapping(value = "/followers", method = RequestMethod.GET)
+    public String getFollowedBy(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, User> retrievedUsers = userRepository.getFollowers(SimpleSecurity.getUid());
+            model.addAttribute("users", retrievedUsers);
+            return "followers";
+        }
+        return "login";
+    }
+
     @RequestMapping(value = "/messagesfollow", method = RequestMethod.GET)
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 

@@ -253,7 +253,8 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public Map<String, User> getFollowers(String id) {
 
-		System.out.println("getFollowers wird auf gerufen mit " + id);
+		System.out.println("getFollowers wird aufgerufen mit " + id);
+		System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + id));
 		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + id);
 
 		Map<String, User> mapUser = new HashMap<>();
