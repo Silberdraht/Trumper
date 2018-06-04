@@ -17,6 +17,8 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -249,16 +251,20 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		Map<String, Message> mapMassages = new HashMap<>();
 		//Map<String, User> mapUser = new HashMap<>();
-		Set<String> setUser;
-		List<String> listMessage = null;
-		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
+		Set<Object> setUser;
+		List<String> listMessage = new ArrayList<>();
 
-		for (String id : setUser) {
+		System.out.println("Set Key: "+ KEY_FOLLOWING_USER + user);
+		setUser = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
+
+		System.out.println("getMessageFollow pre for setUser");
+		for (Object id : setUser) {
 
 
-			listMessage.addAll(getMessageUser(id));
+			listMessage.addAll(getMessageUser(id.toString()));
 		}
 
+		System.out.println("getMessageFollow pre for listMessage");
 		for (String s: listMessage) {
 			mapMassages.put(s, getMessage(s));
 
@@ -275,11 +281,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		//Map<String, Message> messageUser = new HashMap<>();
 			List<String> test = null;
-			System.out.println("SET Key" + KEY_HASH_MESSAGE + KEY_PREFIX_USER + id);
+			System.out.println("SET Key " + KEY_HASH_MESSAGE + id);
 
-			test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + KEY_PREFIX_USER + id, 0, -1));
-
-
-		return test;
+			System.out.println(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
+			//test.add(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1))
+			//test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
+			List<String> messages = srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1);
+			System.out.println("getMessageUser ENDE");
+		return messages;
 	}
 }
