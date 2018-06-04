@@ -140,9 +140,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 	@Override
 	public Message getMessage(String id) {
 		Message message = new Message();
-		//System.out.println("getMessage");
 
-			//System.out.println("getMessage IF");
 			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
 			message.setAutor(srt_hashOps.get(id, "Autor"));
 			message.setText(srt_hashOps.get(id, "Inhalt"));
@@ -178,14 +176,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 		message.setTimestamp(time.toString());
 
 
-
-		//Matze
-
 		String key = KEY_HASH_MESSAGE + id;
-		//System.out.print(key);
-				//message.getId();
 
-		//srt_hashOps.put(key, "id", id);
 		srt_hashOps.put(key, "Zeitstempel", message.getTimestamp());
 		srt_hashOps.put(key, "Autor", message.getAutor());
 		srt_hashOps.put(key, "Geloescht", message.getDeleted());
@@ -195,17 +187,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
-		// the key for a new user is added to the set for all usernames
-		//srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
-
-		// the key for a new user is added to the sorted set for all usernames
-		//srt_zSetOps.add(KEY_ZSET_ALL_USERNAMES, user.getUsername(), 0);
-
-		// to show how objects can be saved
-		//rt_hashOps.put(KEY_HASH_ALL_USERS, key, user);
-
-		//srt_simpleOps.set("user_count", "1");
-		//
 
 
 	}
@@ -213,12 +194,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	@Override
 	public List<String> getAllMessages() {
 
-		/*
-		List list = srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
-		list.forEach(System.out::println);
-		*/
-
-		//System.out.println("ICH ABERS");
 
 		return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
 
@@ -231,8 +206,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		for (String s: getAllMessages()) {
 
-			//System.out.println(s);
-			//System.out.println(getMessage(s));
 			mapResult.put(s, getMessage(s));
 
 
@@ -240,13 +213,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		return mapResult;
 	}
-	//TODO
+
 	@Override
 
 	public Map<String, Message> getMessageFollow(String user) {
 
 		Map<String, Message> mapMassages = new HashMap<>();
-		//Map<String, User> mapUser = new HashMap<>();
+
 		Set<Object> setUser;
 		List<String> listMessage = new ArrayList<>();
 
@@ -280,13 +253,11 @@ public class MessageRepositoryImpl implements MessageRepository {
 	@Override
 	public List<String> getMessageUser(String id) {
 
-		//Map<String, Message> messageUser = new HashMap<>();
-			List<String> test = null;
+
 			System.out.println("SET Key " + KEY_HASH_MESSAGE + id);
 
 			System.out.println(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
-			//test.add(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1))
-			//test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
+
 			List<String> messages = srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1);
 		return messages;
 	}
