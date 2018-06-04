@@ -253,7 +253,7 @@ public class ControllerImpl {
 
             for (User u : retrievedUsers.values())
                 if (u.getUsername().equals(user.getUsername())) {
-                    //TODO Give some form of feedback, ie popup, that registering was not successful due to already existing user
+                    //TO DO Give some form of feedback, ie popup, that registering was not successful due to already existing user
                     return "redirect:/login";
                 }
 
