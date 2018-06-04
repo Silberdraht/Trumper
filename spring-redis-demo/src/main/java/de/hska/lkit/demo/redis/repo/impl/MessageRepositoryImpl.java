@@ -101,9 +101,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private HashOperations<String, String, Message> rt_hashOps;
 
 
-	/*
-	 *
-	 */
 	@Autowired
 	public MessageRepositoryImpl(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
 		this.redisTemplate = redisTemplate;
@@ -191,7 +188,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_hashOps.put(key, "Geloescht", message.getDeleted());
 		srt_hashOps.put(key, "Inhalt", message.getText());
 
-		srt_listOps.rightPush(KEY_LIST_MESSAGE_GLOBAL, key);
+		srt_listOps.leftPush(KEY_LIST_MESSAGE_GLOBAL, key);
 
 		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
@@ -220,9 +217,12 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		//System.out.println("ICH ABERS");
 
-		return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
-
+		return getMessagesInRange(0, -1);
 	}
+
+	public List<String> getMessagesInRange(int start, int end) {
+        return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, start, end);
+    }
 
 	@Override
 	public Map<String, Message> getMessageGlobal() {

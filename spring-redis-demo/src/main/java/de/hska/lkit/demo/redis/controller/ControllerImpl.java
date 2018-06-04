@@ -211,7 +211,7 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-            model.addAttribute("msg", "User successfully added");
+            //model.addAttribute("msg", "User successfully added");
             System.out.println("New User added to DB");
             return "redirect:/messages?";
 
@@ -302,16 +302,7 @@ public class ControllerImpl {
         model.addAttribute("users", retrievedUsers);
         return "users";
     }
-/*
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logoutGet(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
-        System.out.println("logout " + test);
-
-
-        return "logout"; }
-*/
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
         //System.out.println("logout wird aufgerufen");

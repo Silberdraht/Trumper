@@ -2,6 +2,7 @@ package de.hska.lkit.demo.redis.repo;
 
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.hska.lkit.demo.redis.model.User;
@@ -24,7 +25,7 @@ public interface UserRepository {
 	 * 
 	 * @return
 	 */
-	public Map<String, User> getAllUsers();
+	public Map<String, User>  getAllUsers();
 	
 	
 	/**
