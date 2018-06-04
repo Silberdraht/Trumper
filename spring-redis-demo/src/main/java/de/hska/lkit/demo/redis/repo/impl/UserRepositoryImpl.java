@@ -220,8 +220,10 @@ public class UserRepositoryImpl implements UserRepository {
 	public String getIdByName(String name) {
 		if(srt_simpleOps.get(name) != null) {
 
+
 			return srt_simpleOps.get(name);
 		} else
+
 
 			return null;
 	}
@@ -232,6 +234,7 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+
 	public Map<String, User> getFollowing(String id) {
 
 		System.out.println("getFollowing wird auf gerufen mit " + id);
@@ -268,6 +271,7 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+
 	public boolean auth(String uname, String pass) {
 
 		System.out.println("auth wird aufgerufen");
@@ -335,6 +339,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 		System.out.println(redisTemplate.opsForSet().members(key));
 		System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2));
+
 	}
 
 	@Override
