@@ -90,6 +90,17 @@ public class ControllerImpl {
         return "login";
     }
 
+    @RequestMapping(value = "/followers", method = RequestMethod.GET)
+    public String getFollowedBy(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)){
+            Map<String, User> retrievedUsers = userRepository.getFollowers(SimpleSecurity.getUid());
+            model.addAttribute("users", retrievedUsers);
+            return "followers";
+        }
+        return "login";
+    }
+
     @RequestMapping(value = "/messagesfollow", method = RequestMethod.GET)
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
@@ -102,15 +113,6 @@ public class ControllerImpl {
         return "login";
     }
 
-//    @RequestMapping(value = "/addmessage", method = RequestMethod.GET)
-
-//    public String postMessage(@ModelAttribute Message message, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-//        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-
-//            return "newMessage";
-//      }
-//        return "redirect:/login";
-//    }
 
 
 
@@ -134,7 +136,6 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
-
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
         System.out.println("GET addFollow");
@@ -145,7 +146,8 @@ public class ControllerImpl {
         }
 
 
-        return "addFollow";
+        return "login";
+
     }
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.POST)
@@ -155,14 +157,6 @@ public class ControllerImpl {
 
             userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
 
-            /**
-            messageRepository.postMessage(message.getText());
-            model.addAttribute("messages");
-
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-            model.addAttribute("messages", retrievedMessages);
-
-             */
 
             return "addFollow";
         }
@@ -170,6 +164,33 @@ public class ControllerImpl {
 
         return "login";
 
+    }
+
+    @RequestMapping(value = "/unfollow", method = RequestMethod.GET)
+    public String unfollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+
+        System.out.println("GET unFollow");
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            return "unfollow";
+        }
+
+        return "login";
+    }
+
+    @RequestMapping(value = "/unfollow", method = RequestMethod.POST)
+    public String unfollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        System.out.println("Post unfollow");
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
+
+
+            return "unfollow";
+        }
+
+        return "login";
     }
 
 
@@ -184,7 +205,7 @@ public class ControllerImpl {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
-//@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model
+
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
         System.out.println("login credential: " + test);
 
@@ -215,7 +236,6 @@ public class ControllerImpl {
             System.out.println("New User added to DB");
             return "redirect:/messages?";
 
-            //model.addAttribute("users", retrievedUsers);
         }
         else {
             System.out.println("login Post wird aufgerufen");
@@ -226,16 +246,11 @@ public class ControllerImpl {
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
 
-                //return "users/" + user.getName(); }
-                //model.addAttribute("user", new User());
-                //model.addAttribute("users", retrievedUsers);
-                //model.addAttribute("messages", retrievedMessages);
 
                 return "redirect:/messages?page=1";
             }
         }
 
-        //model.addAttribute("user", new User());
         return "login";
     }
 
@@ -305,13 +320,9 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
-        //System.out.println("logout wird aufgerufen");
-        //System.out.println(SimpleSecurity.isSignedIn());
-        //System.out.println(user.getUsername());
-        System.out.println("Logout engaged");
+
         if (SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
-            System.out.println("Logout prep deleteAuth für " + name);
             userRepository.deleteAuth(name);
             return "redirect:/login";
         }
