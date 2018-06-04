@@ -223,7 +223,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	@Override
 	public Map<String, Message> getMessageGlobal() {
-		//System.out.println("Map start");
+
 		Map<String, Message> mapResult = new HashMap<>();
 
 		for (String s: getAllMessages()) {
@@ -233,10 +233,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 			mapResult.put(s, getMessage(s));
 
 
-			//System.out.println(mapResult.get(s).toString());
-
-
-			//System.out.println("ICH WERDE AUFGERUFEN!!!!!!!!!!!!!!");
 		}
 
 		return mapResult;
@@ -259,12 +255,17 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 			listMessage.addAll(getMessageUser(id.toString()));
 		}
+		//Füge eigene Tweets zur persönlichen Timeline hinzu.
+		listMessage.addAll(getMessageUser(user));
 
 		System.out.println("getMessageFollow pre for listMessage");
 		for (String s: listMessage) {
 			mapMassages.put(s, getMessage(s));
 
 		}
+
+
+
 
 
 		return mapMassages;
@@ -283,7 +284,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 			//test.add(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1))
 			//test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
 			List<String> messages = srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1);
-			System.out.println("getMessageUser ENDE");
 		return messages;
 	}
 }

@@ -133,8 +133,6 @@ public class UserRepositoryImpl implements UserRepository {
 		srt_hashOps.put(key, "username", user.getUsername());
 		srt_hashOps.put(key, "password", user.getPassword());
 
-		//Generiere einen Authenfikiations Key und verbinde ihn mit dem User
-		srt_hashOps.put(key, "auth", generateAuth());
 
 		// the key for a new user is added to the set for all usernames
 		srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
@@ -357,27 +355,5 @@ public class UserRepositoryImpl implements UserRepository {
 
 	}
 
-
-
-	private String generateAuth() {
-
-		String rnd = "K";
-
-		for (int i = 0; i <= 15; i++) {
-
-			double random = Math.random()*10;
-
-			rnd += (int)random;
-		}
-		//int random = (int)Math.random()*10;
-		//System.out.println(random);
-
-
-		System.out.println(rnd);
-
-
-
-		return rnd;
-	}
 
 }
