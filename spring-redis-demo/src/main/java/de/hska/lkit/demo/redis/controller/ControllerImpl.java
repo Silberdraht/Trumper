@@ -249,7 +249,7 @@ public class ControllerImpl {
 
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
         System.out.println(send);
-        if (send.equals("register")) {
+        if (send.equals("attempting register")) {
 
             for (User u : retrievedUsers.values())
                 if (u.getUsername().equals(user.getUsername())) {
@@ -261,11 +261,10 @@ public class ControllerImpl {
             model.addAttribute("msg", "User successfully added");
             System.out.println("New User added to DB");
             return "redirect:/messages?";
-
-            //model.addAttribute("users", retrievedUsers);
         }
+
         else {
-            System.out.println("login Post wird aufgerufen");
+            System.out.println("attempting log in");
 
             if(userRepository.auth(user.getUsername(), user.getPassword())) {
                 String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
@@ -296,69 +295,31 @@ public class ControllerImpl {
      */
     @RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
     public String getOneUsers(@PathVariable("username") String username, Model model) {
+        System.out.println(username);
         User found = userRepository.getUser(username);
-
-        model.addAttribute("userFound", found);
+        System.out.println(found.getUsername());
+        model.addAttribute("userFound", found.getUsername());
         return "oneUser";
     }
 
-/*    /**
-     * redirect to page to add a new user
-     *
-     * @return
-     */
-/*    @RequestMapping(value = "/adduser", method = RequestMethod.GET)
-    public String addUser(@ModelAttribute User user) {
-        return "newUser";
-    }
-*/
-/*    /**
-     * add a new user, adds a list of all users to model
-     *
-     * @param user
-     *            User object filled in form
-     * @param model
-     * @return
-     */
-/*    @RequestMapping(value = "/adduser", method = RequestMethod.POST)
-    public String saveUser(@ModelAttribute User user, Model model) {
-
-        userRepository.saveUser(user);
-        model.addAttribute("message", "User successfully added");
-
-        Map<String, User> retrievedUsers = userRepository.getAllUsers();
-
-        model.addAttribute("users", retrievedUsers);
-        return "users";
-    }
-*/
 
     /**
      * search usernames containing the sequence of characters
      *
-     * @param user
+     * @param username
      *            User object filled in form
      * @param model
      * @return
      */
-    @RequestMapping(value = "/searchuser/{pattern}", method = RequestMethod.GET)
-    public String searchUser(@PathVariable("pattern") String pattern, @ModelAttribute User user, Model model) {
+    @RequestMapping(value = "/searchuser", method = RequestMethod.POST)
+    public String searchUser(@ModelAttribute String username, Model model) {
 
-        Map<String, User> retrievedUsers = userRepository.findUsersWith(pattern);
+        Map<String, User> retrievedUsers = userRepository.findUsersWith(username);
 
         model.addAttribute("users", retrievedUsers);
         return "users";
     }
-/*
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logoutGet(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
-        System.out.println("logout " + test);
-
-
-        return "logout"; }
-*/
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
         //System.out.println("logout wird aufgerufen");
