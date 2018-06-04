@@ -136,6 +136,7 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
+
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
         System.out.println("GET addFollow");

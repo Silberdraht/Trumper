@@ -114,8 +114,6 @@ public class UserRepositoryImpl implements UserRepository {
 
 		user.setId(id);
 
-<<<<<<< HEAD
-        //Matze
         srt_simpleOps.increment("user_count", 1);
 		String key = KEY_PREFIX_USER + user.getId();
 		srt_hashOps.put(key, "u_id", id);
@@ -126,22 +124,9 @@ public class UserRepositoryImpl implements UserRepository {
 
         // the key for a new user is added to the set for all usernames
         srt_setOps.add(KEY_SET_ALL_USERNAMES, username);
-=======
-		// to show how objects can be saved
-		// be careful, if username already exists it's not added another time
-
-
-        srt_simpleOps.increment("user_count", 1);
-		String key = KEY_PREFIX_USER + user.getId();
-		srt_hashOps.put(key, "u_id", id);
-		srt_hashOps.put(key, "username", user.getUsername());
-		srt_hashOps.put(key, "password", user.getPassword());
-
->>>>>>> master
 
 		// the key for a new user is added to the sorted set for all usernames
 		srt_zSetOps.add(KEY_ZSET_ALL_USERNAMES, username, 0);
-        System.out.println(username);
 
 		// to show how objects can be saved
 		rt_hashOps.put(KEY_HASH_ALL_USERS, KEY_PREFIX_USER + username, user);
@@ -160,29 +145,22 @@ public class UserRepositoryImpl implements UserRepository {
 	public User getUser(String username) {
 		User user = new User();
 
-<<<<<<< HEAD
 		// if username is in set for all usernames, 
 		if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, username)) {
 
 			System.out.println("isMember wird aufgerufen");
 			// get the user data out of the hash object with key "'user:' + username"
 			String key = username;
-=======
 
 			System.out.println("isMember wird aufgerufen");
 
-			String key = id;
->>>>>>> master
 			user.setId(srt_hashOps.get(key, "id"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
 
-<<<<<<< HEAD
 		} else
 			user = null;
 
-=======
->>>>>>> master
 		return user;
 	}
 
@@ -346,12 +324,6 @@ public class UserRepositoryImpl implements UserRepository {
 		String key = KEY_FOLLOWING_USER + u_id;
 		String value = KEY_PREFIX_USER + u_id2;
 
-<<<<<<< HEAD
-	}
-
-=======
-
-
 		redisTemplate.opsForSet().remove(key, value);
 
 		System.out.println("unfollow Followers " + KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2 + " " + u_id);
@@ -360,6 +332,4 @@ public class UserRepositoryImpl implements UserRepository {
 
 	}
 
-
->>>>>>> master
 }

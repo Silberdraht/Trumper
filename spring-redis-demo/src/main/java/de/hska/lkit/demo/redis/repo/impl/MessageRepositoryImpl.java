@@ -138,11 +138,8 @@ public class MessageRepositoryImpl implements MessageRepository {
 	public Message getMessage(String id) {
 		Message message = new Message();
 
-<<<<<<< HEAD
 			//System.out.println("getMessage IF");
             message.setId(id);
-=======
->>>>>>> master
 			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
 			message.setAutor(srt_hashOps.get(id, "Autor"));
 			message.setText(srt_hashOps.get(id, "Inhalt"));
@@ -222,12 +219,11 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	@Override
 
-	public Map<String, Message> getMessageFollow(String user) {
-
-		Map<String, Message> mapMassages = new HashMap<>();
-
-		Set<Object> setUser;
+        List<Message> resultMessages = new ArrayList<Message>();
+		//Map<String, User> mapUser = new HashMap<>();
+		Set<String> setUser; //TODO Object or String?
 		List<String> listMessage = new ArrayList<>();
+		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
 
 		System.out.println("Set Key: "+ KEY_FOLLOWING_USER + user);
 		setUser = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
@@ -258,8 +254,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	@Override
 	public List<String> getMessageUser(String id) {
-
-
 			System.out.println("SET Key " + KEY_HASH_MESSAGE + id);
 
 			System.out.println(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
