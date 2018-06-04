@@ -341,6 +341,19 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public void unfollowUser(String u_id, String u_id2) {
+		System.out.println("unfollowUser() " + KEY_FOLLOWING_USER + u_id + " " +KEY_PREFIX_USER + u_id2);
+		String key = KEY_FOLLOWING_USER + u_id;
+		String value = KEY_PREFIX_USER + u_id2;
+
+
+		//redisTemplate.opsForSet().add(key, value);
+		redisTemplate.opsForSet().remove(key, value);
+
+		System.out.println("unfollow Followers " + KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2 + " " + u_id);
+		redisTemplate.opsForSet().remove(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2, u_id);
+
+		//System.out.println(redisTemplate.opsForSet().members(key));
+		//System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2));
 
 	}
 

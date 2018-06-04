@@ -119,7 +119,6 @@ public class ControllerImpl {
     }
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
-
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
         System.out.println("GET addFollow");
@@ -129,7 +128,7 @@ public class ControllerImpl {
             return "addFollow";
         }
 
-        return "addFollow";
+        return "login";
     }
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.POST)
@@ -149,6 +148,42 @@ public class ControllerImpl {
              */
 
             return "addFollow";
+        }
+
+        return "login";
+    }
+
+    @RequestMapping(value = "/unfollow", method = RequestMethod.GET)
+    public String unfollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+
+        System.out.println("GET unFollow");
+
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            return "unfollow";
+        }
+
+        return "login";
+    }
+
+    @RequestMapping(value = "/unfollow", method = RequestMethod.POST)
+    public String unfollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        System.out.println("Post unfollow");
+        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+
+            //TO FIX
+            userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
+
+            /**
+             messageRepository.postMessage(message.getText());
+             model.addAttribute("messages");
+
+             Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+             model.addAttribute("messages", retrievedMessages);
+
+             */
+
+            return "unfollow";
         }
 
         return "login";
