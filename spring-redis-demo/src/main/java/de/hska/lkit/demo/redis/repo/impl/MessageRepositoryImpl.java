@@ -141,9 +141,11 @@ public class MessageRepositoryImpl implements MessageRepository {
 		//System.out.println("getMessage");
 
 			//System.out.println("getMessage IF");
+            message.setId(id);
 			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
 			message.setAutor(srt_hashOps.get(id, "Autor"));
 			message.setText(srt_hashOps.get(id, "Inhalt"));
+			message.setDeleted(srt_hashOps.get(id, "Geloescht"));
 
 
 		return message;

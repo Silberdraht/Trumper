@@ -32,4 +32,5 @@ public abstract class SimpleSecurity {
         UserInfo userInfo = user.get();
         return userInfo.uid;
     }
+
 }
