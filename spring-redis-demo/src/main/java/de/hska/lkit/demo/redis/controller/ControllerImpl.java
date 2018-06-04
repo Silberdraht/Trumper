@@ -7,6 +7,7 @@ import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
+import javafx.collections.transformation.SortedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -220,9 +220,9 @@ public class ControllerImpl {
     }
 
 
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @RequestMapping(value = "/userlist", method = RequestMethod.GET)
     public String getAllUsers(Model model) {
-        Map<String, User> retrievedUsers = userRepository.getAllUsers();
+        Collection<User> retrievedUsers = userRepository.getAllUsers().values();
         model.addAttribute("users", retrievedUsers);
 
         return "users";
@@ -312,13 +312,32 @@ public class ControllerImpl {
      * @return
      */
     @RequestMapping(value = "/searchuser", method = RequestMethod.POST)
-    public String searchUser(@ModelAttribute String username, Model model) {
+    public String searchUser(@ModelAttribute String username, HttpServletRequest req, Model model) {
 
-        Map<String, User> retrievedUsers = userRepository.findUsersWith(username);
-
+        Collection<User> retrievedUsers = userRepository.findUsersWith(username).values();
+        String uid = simpleCookieInterceptor.getCookieUID(req);
+        Map<String, User> following = userRepository.getFollowing(uid);
+        List<Boolean> isFollowing = new LinkedList<>();
+        for (User user : retrievedUsers){
+            if (following.containsValue(user)) {
+                isFollowing.add(true);
+            }
+            else {
+                isFollowing.add(false);
+            }
+        }
+        System.out.println(isFollowing.size() == retrievedUsers.size());
+        model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("users", retrievedUsers);
         return "users";
     }
+/*
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    public String foundUsers(Model model) {
+
+        return "users";
+    }
+*/
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
