@@ -23,7 +23,4 @@ public interface MessageRepository {
 
     public List<String> getMessageUser(String id);
 
-
-
-
 }

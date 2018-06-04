@@ -3,6 +3,7 @@ package de.hska.lkit.demo.redis.repo.impl;
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.model.User;
+
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
 import de.hska.lkit.demo.redis.repo.UserRepository;
@@ -45,7 +46,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_LIST_MESSAGE_USER = "m:";
 
+
 	private static final String KEY_FOLLOWING_USER = "following:";
+
 
 	/**
 	 * to generate unique ids for message
@@ -241,8 +244,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		return mapResult;
 	}
-	//TO DO
+	//TODO
 	@Override
+
 	public Map<String, Message> getMessageFollow(String user) {
 
 		Map<String, Message> mapMassages = new HashMap<>();
