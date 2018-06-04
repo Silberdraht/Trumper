@@ -124,12 +124,10 @@ public class UserRepositoryImpl implements UserRepository {
 		// to show how objects can be saved
 		// be careful, if username already exists it's not added another time
 
-        //Matze
+
         srt_simpleOps.increment("user_count", 1);
 		String key = KEY_PREFIX_USER + user.getId();
 		srt_hashOps.put(key, "u_id", id);
-		//srt_hashOps.put(key, "firstName", user.getFirstname());
-		//srt_hashOps.put(key, "lastName", user.getLastname());
 		srt_hashOps.put(key, "username", user.getUsername());
 		srt_hashOps.put(key, "password", user.getPassword());
 
@@ -159,19 +157,14 @@ public class UserRepositoryImpl implements UserRepository {
 	public User getUser(String id) {
 		User user = new User();
 
-		// if username is in set for all usernames, 
-		//if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, id)) {
 
 			System.out.println("isMember wird aufgerufen");
-			// get the user data out of the hash object with key "'user:' + username"
+
 			String key = id;
 			user.setId(srt_hashOps.get(key, "id"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
-			/*
-		} else
-			user = null;
-			*/
+
 		return user;
 	}
 
@@ -274,9 +267,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 	public boolean auth(String uname, String pass) {
 
-		System.out.println("auth wird aufgerufen");
 
-		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
 		String uid = getIdByName(uname);
 
 		if (uid == null) {
@@ -285,7 +276,7 @@ public class UserRepositoryImpl implements UserRepository {
 		System.out.println("uid: " + uid);
 
 		BoundHashOperations<String, String, String> userOps = stringRedisTemplate.boundHashOps(KEY_PREFIX_USER + uid);
-		System.out.println("Pass Bound HashOps");
+
 		return userOps.get("password").equals(pass);
 
 	}
@@ -293,9 +284,6 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public String addAuth(String uname, long timeout, TimeUnit tUnit) {
 
-		//System.out.println("Start addAuth");
-
-		//String uid = stringRedisTemplate.opsForValue().get(KEY_PREFIX_USER + getIdByName(uname));
 		String uid = getIdByName(uname);
 
 		String auth = UUID.randomUUID().toString();
@@ -325,7 +313,6 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public void followUser(String u_id, String u_id2) {
-		//System.out.println("followUser Übergabe: " + u_id + " " + KEY_PREFIX_USER + u_id2);
 
 		System.out.println(KEY_FOLLOWING_USER + u_id + " " +KEY_PREFIX_USER + u_id2);
 		String key = KEY_FOLLOWING_USER + u_id;
@@ -349,14 +336,12 @@ public class UserRepositoryImpl implements UserRepository {
 		String value = KEY_PREFIX_USER + u_id2;
 
 
-		//redisTemplate.opsForSet().add(key, value);
+
 		redisTemplate.opsForSet().remove(key, value);
 
 		System.out.println("unfollow Followers " + KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2 + " " + u_id);
 		redisTemplate.opsForSet().remove(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2, u_id);
 
-		//System.out.println(redisTemplate.opsForSet().members(key));
-		//System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + u_id2));
 
 	}
 
