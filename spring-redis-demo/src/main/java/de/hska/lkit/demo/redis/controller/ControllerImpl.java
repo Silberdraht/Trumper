@@ -1,6 +1,5 @@
 package de.hska.lkit.demo.redis.controller;
 
-
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.model.User;
@@ -34,7 +33,6 @@ public class ControllerImpl {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.simpleCookieInterceptor = simpleCookieInterceptor;
-
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
