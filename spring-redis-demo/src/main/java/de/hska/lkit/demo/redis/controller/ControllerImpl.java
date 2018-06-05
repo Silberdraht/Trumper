@@ -61,20 +61,21 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
 
-            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
+            List<String> retrievedMessages = messageRepository.getMessageIsDsAll();
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages = new ArrayList<>();
 
-            int i = 0;
-            for (Message currentMessage : retrievedMessages) {
-                if (i >= offset) {
-                    if (i < offset + pagelength) {
-                        pagedMessages.add(currentMessage);
+            int j;
+            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
+                j = retrievedMessages.size() - i - 1;
+                if (j >= offset) {
+                    if (j < offset + pagelength) {
+                        String m_id = retrievedMessages.get(j);
+                        pagedMessages.add(messageRepository.getMessage(m_id));
                     } else {
                         break; //for performance
                     }
                 }
-                i += 1;
             }
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
@@ -115,7 +116,7 @@ public class ControllerImpl {
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
-            List<Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
+            List<Message> retrievedMessages = messageRepository.getMessagesOfUser(SimpleSecurity.getUid());
             model.addAttribute("messages", retrievedMessages);
             return "messagesFollow";
 
@@ -134,23 +135,9 @@ public class ControllerImpl {
             List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
             model.addAttribute("messages", retrievedMessages);
 
-
             return "redirect:/messages?page="+page;
 
         }
-
-        return "login";
-    }
-
-
-    @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
-
-    public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            return "addFollow";
-        }
-
         return "login";
     }
 
@@ -158,9 +145,10 @@ public class ControllerImpl {
     public String addFollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
+            String followedUserID = userRepository.getIdByName(user.getUsername());
 
-            userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
-
+            userRepository.followUser(SimpleSecurity.getUid(), followedUserID);
+            messageRepository.followMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
 
             return "addFollow";
         }
@@ -168,16 +156,6 @@ public class ControllerImpl {
 
         return "login";
 
-    }
-
-    @RequestMapping(value = "/unfollow", method = RequestMethod.GET)
-    public String unfollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            return "unfollow";
-        }
-
-        return "login";
     }
 
     @RequestMapping(value = "/unfollow", method = RequestMethod.POST)
@@ -186,7 +164,6 @@ public class ControllerImpl {
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
 
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
-
 
             return "unfollow";
         }

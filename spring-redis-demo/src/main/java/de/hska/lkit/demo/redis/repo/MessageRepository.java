@@ -9,19 +9,17 @@ import java.util.Set;
 
 public interface MessageRepository {
 
-
-
     public Message getMessage(String id);
-
 
     public void postMessage(String text);
 
-    public List<String> getMessagesAll();
+    public List<String> getMessageIsDsAll();
 
     public List<Message> getMessagesGlobal();
 
-    public List<Message> getMessageFollow(String user);
+    public List<Message> getMessagesOfUser(String user);
 
-    public List<String> getMessageUser(String id);
+    public List<String> getMessageIDsOfUser(String id);
 
+    public void followMessagesFromUser(String uid, String followedUserID);
 }

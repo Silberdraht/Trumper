@@ -28,15 +28,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_HASH_ALL_USERS 		= "all:user";
 
-	private static final String KEY_PREFIX_USER 	= "user:";
-
 	private static final String KEY_HASH_MESSAGE = "m:";
 
 	private static final String KEY_LIST_MESSAGE_GLOBAL = "m_global";
 
-	private static final String KEY_LIST_MESSAGE_USER = "m:";
+	private static final String KEY_LIST_MESSAGE_USER = "m:user";
 
-	private static final String KEY_FOLLOWING_USER = "following:";
+	private static final String KEY_FOLLOWING_USER = "m:following:";
 
 	/**
 	 * to generate unique ids for message
@@ -74,6 +72,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 	 */
 	private ZSetOperations<String, String> srt_zSetOps;
 
+    /**
+     * list operations for stringRedisTemplate
+     */
 	private ListOperations<String, String> srt_listOps;
 
 	/**
@@ -89,7 +90,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 		this.stringRedisTemplate = stringRedisTemplate;
 		this.m_id = new RedisAtomicLong("m_id", stringRedisTemplate.getConnectionFactory());
 	}
-
 	
 	@PostConstruct
 	private void init() {
@@ -100,20 +100,17 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_listOps = stringRedisTemplate.opsForList();
 	}
 
-	/*	public MessageRepositoryImpl(String id) {
-
-	}*/
-
+    /**
+     * Gets the message object for messageID.
+     * @param messageID
+     * @return
+     */
 	@Override
-	public Message getMessage(String id) {
-		Message message = new Message();
+	public Message getMessage(String messageID) {
+	    if(!messageID.startsWith(KEY_HASH_MESSAGE))
+            messageID = KEY_HASH_MESSAGE + messageID;
 
-            message.setId(id);
-			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
-			message.setAutor(srt_hashOps.get(id, "Autor"));
-			message.setText(srt_hashOps.get(id, "Inhalt"));
-			message.setDeleted(srt_hashOps.get(id, "Geloescht"));
-
+		Message message = rt_hashOps.get(KEY_LIST_MESSAGE_GLOBAL, messageID);
 		return message;
 	}
 
@@ -121,87 +118,79 @@ public class MessageRepositoryImpl implements MessageRepository {
 	public void postMessage(String text) {
 
 		String id = String.valueOf(m_id.incrementAndGet());
+        String username = SimpleSecurity.getName();
 
-		Message message = new Message();
-		message.setText(text);
-		message.setAutor(SimpleSecurity.getName());
-		message.setId(id);
-		message.setDeleted("0");
+        String timestamp;
+        Object timeObject = redisTemplate.execute(RedisServerCommands::time);
+        Date time = new Date((long)timeObject);
+        timestamp = time.toString();
 
-		Object timeObject = redisTemplate.execute(RedisServerCommands::time);
-		message.setTimestamp(timeObject.toString());
+		Message message = new Message(id, username, timestamp, text);
 
-		Date time = new Date((long)timeObject);
-		message.setTimestamp(time.toString());
+		String m_id = KEY_HASH_MESSAGE + id;
 
-		String key = KEY_HASH_MESSAGE + id;
+		srt_hashOps.put(m_id, "Zeitstempel", message.getTimestamp());
+		srt_hashOps.put(m_id, "Autor", message.getAutor());
+		srt_hashOps.put(m_id, "Inhalt", message.getText());
 
-		srt_hashOps.put(key, "Zeitstempel", message.getTimestamp());
-		srt_hashOps.put(key, "Autor", message.getAutor());
-		srt_hashOps.put(key, "Geloescht", message.getDeleted());
-		srt_hashOps.put(key, "Inhalt", message.getText());
+		srt_listOps.leftPush(KEY_LIST_MESSAGE_GLOBAL, m_id);
+		srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + id, m_id);
+		rt_hashOps.put(KEY_LIST_MESSAGE_GLOBAL, m_id, message);
+        rt_hashOps.put(KEY_LIST_MESSAGE_USER + id, m_id, message);
+    }
 
-		srt_listOps.leftPush(KEY_LIST_MESSAGE_GLOBAL, key);
-
-		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
-		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
+    /**
+     * Gets all message ID's from last to first (n -> 1).
+     * @return
+     */
+    @Override
+    public List<String> getMessageIsDsAll() {
+		return getMessageIDsInRange(0, -1);
 	}
 
-	@Override
-	public List<String> getMessagesAll() {
-		return getMessagesInRange(0, -1);
-	}
-
-	public List<String> getMessagesInRange(int start, int end) {
+    /**
+     * Gets all message ID's from end to start (n -> 1).
+     * @param start
+     * @param end
+     * @return
+     */
+	public List<String> getMessageIDsInRange(int start, int end) {
         return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, start, end);
     }
 
+    /**
+     * Gets all messages from first to last (1 -> n).
+     * @return
+     */
 	@Override
 	public List<Message> getMessagesGlobal() {
-
-		List<Message> resultList = new ArrayList<>();
-
-		for (String s: getMessagesAll()) {
-			resultList.add(getMessage(s));
-		}
-
-		return resultList;
+		return rt_hashOps.values(KEY_LIST_MESSAGE_GLOBAL);
 	}
 
+    /**
+     * Gets all messages of user from userID from first to last (1 -> n).
+     * @param userID
+     * @return
+     */
 	@Override
-    public List<Message> getMessageFollow(String user) {
-
-        List<Message> resultMessages = new ArrayList<Message>();
-		Set<String> setUser;
-		List<String> listMessage = new ArrayList<>();
-		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
-
-		System.out.println("Set Key: "+ KEY_FOLLOWING_USER + user);
-		System.out.println("getMessageFollow pre for setUser");
-		for (String id : setUser) {
-            listMessage.addAll(getMessageUser(id));
-        }
-
-		//Füge eigene Tweets zur persönlichen Timeline hinzu.
-		listMessage.addAll(getMessageUser(user));
-
-		System.out.println("getMessageFollow pre for listMessage");
-		for (String s: listMessage) {
-            resultMessages.add(getMessage(s));
-		}
-
-		return resultMessages;
+    public List<Message> getMessagesOfUser(String userID) {
+        return rt_hashOps.values(KEY_LIST_MESSAGE_USER + userID);
 	}
 
-
-
+    /**
+     * Gets all message ID's of user from userID from last to first (n -> 1).
+     * @param userID
+     * @return
+     */
 	@Override
-	public List<String> getMessageUser(String id) {
-			System.out.println("SET Key " + KEY_HASH_MESSAGE + id);
+	public List<String> getMessageIDsOfUser(String userID) {
+	    return srt_listOps.range(KEY_LIST_MESSAGE_USER + userID, 0, -1);
+	}
 
-			System.out.println(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
-
-			List<String> messages = srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1);
-		return messages;
+    @Override
+    public void followMessagesFromUser(String userID, String followedUserID) {
+        String key = KEY_LIST_MESSAGE_USER + userID;
+        String value = KEY_FOLLOWING_USER + followedUserID;
+        rt_hashOps.putAll(KEY_LIST_MESSAGE_USER + userID, rt_hashOps.entries(KEY_LIST_MESSAGE_USER + followedUserID));
 	}
 }

@@ -226,7 +226,6 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public Map<String, User> getFollowers(String id) {
 
-		System.out.println("getFollowers wird aufgerufen mit " + id);
 		System.out.println(redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + id));
 		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + id);
 
@@ -276,14 +275,11 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public void deleteAuth(String uname) {
-		System.out.println("Gelöscht wird id " + getIdByName(uname));
 		String uid = (KEY_PREFIX_USER + getIdByName(uname));
 		String authKey = "uid:" + uid + ":auth";
 		String auth = (String) stringRedisTemplate.boundHashOps(authKey).get("auth");
-		System.out.println(auth);
 		List<String> keysToDelete = Arrays.asList(authKey, "auth:"+auth+":uid");
 		stringRedisTemplate.delete(keysToDelete);
-		System.out.println("Delete done");
 	}
 
 	@Override

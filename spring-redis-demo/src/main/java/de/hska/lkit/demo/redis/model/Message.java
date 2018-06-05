@@ -8,12 +8,17 @@ public class Message implements Serializable {
     String id;
     String timestamp;
     String autor;
-    String deleted;
     String text;
-    List<String> messages;
 
 
     public Message() {}
+
+    public Message(String id, String autor, String timestamp, String text) {
+        setId(id);
+        setAutor(autor);
+        setTimestamp(timestamp);
+        setText(text);
+    }
 
     public String getId() {
         return id;
@@ -39,12 +44,6 @@ public class Message implements Serializable {
         this.autor = autor;
     }
 
-    public String getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(String deleted) {this.deleted = deleted; }
-
     public String getText() {
         return text;
     }
@@ -52,6 +51,4 @@ public class Message implements Serializable {
     public void setText(String text) {
         this.text = text;
     }
-
-    public List<String> getMessages() {return messages;}
 }
