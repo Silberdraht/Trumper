@@ -56,7 +56,6 @@ public class ControllerImpl {
                                  @ModelAttribute Message message,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
-        //System.out.println("Msg Rep wird aufgerufen")
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
 
             List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
@@ -145,21 +144,16 @@ public class ControllerImpl {
 
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        System.out.println("GET addFollow");
-
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
-
             return "addFollow";
         }
 
-
         return "login";
-
     }
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.POST)
     public String addFollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        System.out.println("Post addFollow");
+
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
 
             userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
@@ -176,10 +170,7 @@ public class ControllerImpl {
     @RequestMapping(value = "/unfollow", method = RequestMethod.GET)
     public String unfollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        System.out.println("GET unFollow");
-
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
-
             return "unfollow";
         }
 
@@ -188,7 +179,7 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/unfollow", method = RequestMethod.POST)
     public String unfollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        System.out.println("Post unfollow");
+
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
 
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
@@ -211,10 +202,7 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
-        System.out.println("login credential: " + test);
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             return "redirect:/messages";
@@ -226,9 +214,7 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
-
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
-        System.out.println(send);
         if (send.equals("register")) {
 
             for (User u : retrievedUsers.values())
@@ -238,14 +224,9 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-            //model.addAttribute("msg", "User successfully added");
-            System.out.println("New User added to DB");
             return "redirect:/messages?";
 
-        }
-        else {
-            System.out.println("login Post wird aufgerufen");
-
+        } else {
             if(userRepository.auth(user.getUsername(), user.getPassword())) {
                 String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
                 Cookie cookie = new Cookie("auth", auth);
@@ -325,14 +306,12 @@ public class ControllerImpl {
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    public String logout() {
+    public String logout(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
-        if (SimpleSecurity.isSignedIn()) {
+        if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
             userRepository.deleteAuth(name);
-            return "redirect:/login";
         }
-        return "redirect:/messages"; }
-
-
+        return "redirect:/login";
+    }
 }
