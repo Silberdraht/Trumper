@@ -20,13 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
 
-
     @Autowired
     private StringRedisTemplate template;
 
 
     @Resource(name = "redisTemplate")
-    private ValueOperations<String,String> srt_simpleOps;
+    private ValueOperations<String, String> srt_simpleOps;
 
     public String getCookieUID(HttpServletRequest req) {
         for (Cookie cookie : req.getCookies()) {
@@ -55,6 +54,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                         System.out.println("CL auth != null");
 
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
+
 
                         System.out.println("uid durch cookie " + uid);
                         if (uid != null) {

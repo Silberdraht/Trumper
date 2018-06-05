@@ -4,7 +4,7 @@ import org.springframework.core.NamedThreadLocal;
 
 public abstract class SimpleSecurity {
 
-    private static final ThreadLocal<UserInfo> user = new NamedThreadLocal<>("microblog-id");
+    private static final ThreadLocal<UserInfo> user = new NamedThreadLocal<UserInfo>("microblog-id");
     private static class UserInfo {
         String name;
         String uid;

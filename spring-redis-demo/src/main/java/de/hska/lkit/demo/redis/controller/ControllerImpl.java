@@ -201,17 +201,8 @@ public class ControllerImpl {
         System.out.println("Post unfollow");
         if(simpleCookieInterceptor.preHandle(request, response, model)) {
 
-            //TO FIX
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
 
-            /**
-             messageRepository.postMessage(message.getText());
-             model.addAttribute("messages");
-
-             Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-             model.addAttribute("messages", retrievedMessages);
-
-             */
 
             return "unfollow";
         }
@@ -231,7 +222,7 @@ public class ControllerImpl {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
-//@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model
+
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
         System.out.println("login credential: " + test);
 
@@ -249,22 +240,22 @@ public class ControllerImpl {
 
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
         System.out.println(send);
-        if (send.equals("attempting register")) {
+        if (send.equals("register")) {
 
             for (User u : retrievedUsers.values())
                 if (u.getUsername().equals(user.getUsername())) {
-                    //TO DO Give some form of feedback, ie popup, that registering was not successful due to already existing user
+                    //TODO Give some form of feedback, ie popup, that registering was not successful due to already existing user
                     return "redirect:/login";
                 }
 
             userRepository.saveUser(user);
-            model.addAttribute("msg", "User successfully added");
+            //model.addAttribute("msg", "User successfully added");
             System.out.println("New User added to DB");
             return "redirect:/messages?";
         }
 
         else {
-            System.out.println("attempting log in");
+            System.out.println("login Post wird aufgerufen");
 
             if(userRepository.auth(user.getUsername(), user.getPassword())) {
                 String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
@@ -296,7 +287,8 @@ public class ControllerImpl {
     @RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
     public String getOneUsers(@PathVariable("username") String username, Model model) {
         System.out.println(username);
-        User found = userRepository.getUser(username);
+
+        User found = userRepository.getUser(SimpleSecurity.getUid());
         System.out.println(found.getUsername());
         model.addAttribute("userFound", found.getUsername());
         return "oneUser";
@@ -341,10 +333,7 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
-        //System.out.println("logout wird aufgerufen");
-        //System.out.println(SimpleSecurity.isSignedIn());
-        //System.out.println(user.getUsername());
-        System.out.println("Logout engaged");
+
         if (SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
             System.out.println("Logout prep deleteAuth für " + name);

@@ -103,9 +103,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private HashOperations<String, String, Message> rt_hashOps;
 
 
-	/*
-	 *
-	 */
 	@Autowired
 	public MessageRepositoryImpl(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
 		this.redisTemplate = redisTemplate;
