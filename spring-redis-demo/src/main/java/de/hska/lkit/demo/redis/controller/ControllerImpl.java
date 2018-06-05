@@ -16,10 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -211,7 +208,6 @@ public class ControllerImpl {
         return "login";
     }
 
-
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
@@ -278,8 +274,7 @@ public class ControllerImpl {
         for (User user : retrievedUsers){
             if (following.containsValue(user)) {
                 isFollowing.add(true);
-            }
-            else {
+            } else {
                 isFollowing.add(false);
             }
         }
