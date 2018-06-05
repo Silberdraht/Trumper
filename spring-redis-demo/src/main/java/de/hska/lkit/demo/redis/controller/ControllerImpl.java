@@ -17,7 +17,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Duration;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -54,15 +59,21 @@ public class ControllerImpl {
                                  @ModelAttribute Message message,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
-        //System.out.println("Msg Rep wird aufgerufen");
+        //System.out.println("Msg Rep wird aufgerufen")
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-            int i = 0;
+
+            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
             int offset = (page - 1) * pagelength;
-            Map<String, Message> pagedMessages = new HashMap<>();
-            for (Map.Entry<String, Message> entry : retrievedMessages.entrySet()) {
-                if (i >= offset && i < offset + pagelength) {
-                    pagedMessages.put(entry.getKey(), entry.getValue());
+            List<Message> pagedMessages = new ArrayList<>();
+
+            int i = 0;
+            for (Message currentMessage : retrievedMessages) {
+                if (i >= offset) {
+                    if (i < offset + pagelength) {
+                        pagedMessages.add(currentMessage);
+                    } else {
+                        break; //for performance
+                    }
                 }
                 i += 1;
             }
@@ -105,24 +116,13 @@ public class ControllerImpl {
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
-            Map<String, Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
+            List<Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
             model.addAttribute("messages", retrievedMessages);
             return "messagesFollow";
 
         }
         return "login";
     }
-
-//    @RequestMapping(value = "/addmessage", method = RequestMethod.GET)
-
-//    public String postMessage(@ModelAttribute Message message, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-//        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-
-//            return "newMessage";
-//      }
-//        return "redirect:/login";
-//    }
-
 
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
@@ -132,7 +132,7 @@ public class ControllerImpl {
             messageRepository.postMessage(message.getText());
             model.addAttribute("messages");
 
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
             model.addAttribute("messages", retrievedMessages);
 
 
@@ -145,6 +145,7 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
+
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
         System.out.println("GET addFollow");
@@ -166,14 +167,6 @@ public class ControllerImpl {
 
             userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
 
-            /**
-            messageRepository.postMessage(message.getText());
-            model.addAttribute("messages");
-
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-            model.addAttribute("messages", retrievedMessages);
-
-             */
 
             return "addFollow";
         }
@@ -234,7 +227,6 @@ public class ControllerImpl {
     }
 
 
-
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
 
@@ -263,16 +255,11 @@ public class ControllerImpl {
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
 
-                //return "users/" + user.getName(); }
-                //model.addAttribute("user", new User());
-                //model.addAttribute("users", retrievedUsers);
-                //model.addAttribute("messages", retrievedMessages);
 
                 return "redirect:/messages?page=1";
             }
         }
 
-        //model.addAttribute("user", new User());
         return "login";
     }
 
@@ -323,20 +310,13 @@ public class ControllerImpl {
         model.addAttribute("users", retrievedUsers);
         return "users";
     }
-/*
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public String foundUsers(Model model) {
 
-        return "users";
-    }
-*/
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
 
         if (SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
-            System.out.println("Logout prep deleteAuth für " + name);
             userRepository.deleteAuth(name);
             return "redirect:/login";
         }

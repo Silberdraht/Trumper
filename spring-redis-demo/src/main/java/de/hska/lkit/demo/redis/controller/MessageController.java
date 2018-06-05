@@ -37,9 +37,9 @@ public class MessageController {
 
 
 	@RequestMapping(value = "/messages", method = RequestMethod.GET)
-	public String getAllMessages(Model model) {
+	public String getMessagesAll(Model model) {
 		System.out.println("Msg Rep wird aufgerufen");
-		Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+		Map<String, Message> retrievedMessages = messageRepository.getMessagesGlobal();
 		model.addAttribute("messages", retrievedMessages);
 		return "messages";
 	}
@@ -59,7 +59,7 @@ public class MessageController {
 		messageRepository.postMessage(message.getText());
 		model.addAttribute("messages");
 
-		Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+		Map<String, Message> retrievedMessages = messageRepository.getMessagesGlobal();
 		model.addAttribute("messages", retrievedMessages);
 
 

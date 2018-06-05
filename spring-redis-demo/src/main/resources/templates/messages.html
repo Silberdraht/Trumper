@@ -68,11 +68,11 @@
             <div class="panel panel-default" th:each="element : ${messages}">
                 <div class="row">
                     <div class="col-8">
-                        <div class="panel-heading"><h4 th:text="${element.value.autor}"></h4></div>
-                        <div class="panel-body" th:text="${element.value.text}"></div>
+                        <div class="panel-heading"><h4 th:text="${element.autor}"></h4></div>
+                        <div class="panel-body" th:text="${element.text}"></div>
                     </div>
                     <div class="col-4">
-                        <div class="panel-footer" th:text="${element.value.timestamp}"></div>
+                        <div class="panel-footer" th:text="${element.timestamp}"></div>
                     </div>
                 </div>
 

@@ -2,12 +2,9 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
 
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
-import de.hska.lkit.demo.redis.repo.UserRepository;
-import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
@@ -17,8 +14,6 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -92,10 +87,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private ListOperations<String, String> srt_listOps;
 
 
-
-
-
-
 	/**
 	 * hash operations for redisTemplate
 	 */
@@ -137,12 +128,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 	@Override
 	public Message getMessage(String id) {
 		Message message = new Message();
-		//System.out.println("getMessage");
 
 			//System.out.println("getMessage IF");
+            message.setId(id);
 			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
 			message.setAutor(srt_hashOps.get(id, "Autor"));
 			message.setText(srt_hashOps.get(id, "Inhalt"));
+			message.setDeleted(srt_hashOps.get(id, "Geloescht"));
 
 
 		return message;
@@ -160,8 +152,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		message.setAutor(SimpleSecurity.getName());
 
-
-
 		message.setId(id);
 
 		message.setDeleted("0");
@@ -175,116 +165,76 @@ public class MessageRepositoryImpl implements MessageRepository {
 		message.setTimestamp(time.toString());
 
 
-
-		//Matze
-
 		String key = KEY_HASH_MESSAGE + id;
-		//System.out.print(key);
-				//message.getId();
 
-		//srt_hashOps.put(key, "id", id);
 		srt_hashOps.put(key, "Zeitstempel", message.getTimestamp());
 		srt_hashOps.put(key, "Autor", message.getAutor());
 		srt_hashOps.put(key, "Geloescht", message.getDeleted());
 		srt_hashOps.put(key, "Inhalt", message.getText());
 
-		srt_listOps.rightPush(KEY_LIST_MESSAGE_GLOBAL, key);
+		srt_listOps.leftPush(KEY_LIST_MESSAGE_GLOBAL, key);
 
 		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
-		// the key for a new user is added to the set for all usernames
-		//srt_setOps.add(KEY_SET_ALL_USERNAMES, user.getUsername());
-
-		// the key for a new user is added to the sorted set for all usernames
-		//srt_zSetOps.add(KEY_ZSET_ALL_USERNAMES, user.getUsername(), 0);
-
-		// to show how objects can be saved
-		//rt_hashOps.put(KEY_HASH_ALL_USERS, key, user);
-
-		//srt_simpleOps.set("user_count", "1");
-		//
 
 
 	}
 
 	@Override
-	public List<String> getAllMessages() {
-
-		/*
-		List list = srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
-		list.forEach(System.out::println);
-		*/
-
-		//System.out.println("ICH ABERS");
-
-		return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, 0, -1);
-
+	public List<String> getMessagesAll() {
+		return getMessagesInRange(0, -1);
 	}
 
+	public List<String> getMessagesInRange(int start, int end) {
+        return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, start, end);
+    }
+
 	@Override
-	public Map<String, Message> getMessageGlobal() {
-		//System.out.println("Map start");
-		Map<String, Message> mapResult = new HashMap<>();
+	public List<Message> getMessagesGlobal() {
 
-		for (String s: getAllMessages()) {
+		List<Message> resultList = new ArrayList<>();
 
-			//System.out.println(s);
-			//System.out.println(getMessage(s));
-			mapResult.put(s, getMessage(s));
-
-
-			//System.out.println(mapResult.get(s).toString());
-
-
-			//System.out.println("ICH WERDE AUFGERUFEN!!!!!!!!!!!!!!");
+		for (String s: getMessagesAll()) {
+			resultList.add(getMessage(s));
 		}
 
-		return mapResult;
+		return resultList;
 	}
-	//TODO
+
 	@Override
+    public List<Message> getMessageFollow(String user) {
 
-	public Map<String, Message> getMessageFollow(String user) {
-
-		Map<String, Message> mapMassages = new HashMap<>();
-		//Map<String, User> mapUser = new HashMap<>();
-		Set<Object> setUser;
+        List<Message> resultMessages = new ArrayList<Message>();
+		Set<String> setUser;
 		List<String> listMessage = new ArrayList<>();
+		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
 
 		System.out.println("Set Key: "+ KEY_FOLLOWING_USER + user);
-		setUser = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
-
 		System.out.println("getMessageFollow pre for setUser");
-		for (Object id : setUser) {
+		for (String id : setUser) {
+            listMessage.addAll(getMessageUser(id));
+        }
 
-
-			listMessage.addAll(getMessageUser(id.toString()));
-		}
+		//Füge eigene Tweets zur persönlichen Timeline hinzu.
+		listMessage.addAll(getMessageUser(user));
 
 		System.out.println("getMessageFollow pre for listMessage");
 		for (String s: listMessage) {
-			mapMassages.put(s, getMessage(s));
-
+            resultMessages.add(getMessage(s));
 		}
 
-
-		return mapMassages;
+		return resultMessages;
 	}
 
 
 
 	@Override
 	public List<String> getMessageUser(String id) {
-
-		//Map<String, Message> messageUser = new HashMap<>();
-			List<String> test = null;
 			System.out.println("SET Key " + KEY_HASH_MESSAGE + id);
 
 			System.out.println(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
-			//test.add(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1))
-			//test.addAll(srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1));
+
 			List<String> messages = srt_listOps.range(KEY_HASH_MESSAGE + id, 0, -1);
-			System.out.println("getMessageUser ENDE");
 		return messages;
 	}
 }
