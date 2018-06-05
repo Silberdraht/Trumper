@@ -285,15 +285,13 @@ public class ControllerImpl {
         return "redirect:/login";
     }
 
-
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    public String logout(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+    public String logout(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
-        if (simpleCookieInterceptor.preHandle(req, res, model)) {
+        if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
             userRepository.deleteAuth(name);
         }
         return "redirect:/login";
     }
-
 }

@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
 
+
     @Autowired
     private StringRedisTemplate template;
 
