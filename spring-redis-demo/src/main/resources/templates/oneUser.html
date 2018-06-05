@@ -19,18 +19,12 @@
 			<thead>
 				<tr>
 					<th>id</th>
-					<th>username</th>
-					<th>firstname</th>
-					<th>lastname</th>
 				</tr>
 			</thead>
 
 			<tbody>
-				<tr th:if="${userFound}">
-					<td th:text="${userFound.id}">id</td>
-					<td th:text="${userFound.username}">Some name</td>
-					<td th:text="${userFound.firstname}">Some name</td>
-					<td th:text="${userFound.lastname}">Some name</td>
+				<tr>
+					<td th:text="${userFound}">id</td>
 				</tr>
 
 			</tbody>

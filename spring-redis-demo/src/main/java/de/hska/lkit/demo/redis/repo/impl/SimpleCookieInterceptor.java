@@ -1,6 +1,7 @@
 
 package de.hska.lkit.demo.redis.repo.impl;
 
+import com.sun.deploy.net.HttpResponse;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ListOperations;
@@ -19,13 +20,21 @@ import javax.servlet.http.HttpServletResponse;
 public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
 
-
     @Autowired
     private StringRedisTemplate template;
 
 
     @Resource(name = "redisTemplate")
-    private ValueOperations<String,String> srt_simpleOps;
+    private ValueOperations<String, String> srt_simpleOps;
+
+    public String getCookieUID(HttpServletRequest req) {
+        for (Cookie cookie : req.getCookies()) {
+            if (cookie.getName().equals("auth")) {
+                return template.opsForValue().get("auth:" + cookie.getValue() + ":uid");
+            }
+        }
+        return "";
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
@@ -34,7 +43,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
 
         Cookie[] cookies = req.getCookies();
-        if (!ObjectUtils.isEmpty(cookies))
+        if (cookies != null) { //if (!ObjectUtils.isEmpty(cookies))
             System.out.println("first if");
             for (Cookie cookie : cookies)
                 if (cookie.getName().equals("auth")) {
@@ -64,8 +73,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                         }
                     }
                 }
-
+        }
         return false; //return true;
     }
 }
-
