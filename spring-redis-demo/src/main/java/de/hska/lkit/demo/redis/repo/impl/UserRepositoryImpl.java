@@ -72,8 +72,6 @@ public class UserRepositoryImpl implements UserRepository {
 	private ZSetOperations<String, String> srt_zSetOps;
 
 
-	
-
 	/**
 	 * hash operations for redisTemplate
 	 */

@@ -2,12 +2,9 @@ package de.hska.lkit.demo.redis.repo.impl;
 
 import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
 
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
-import de.hska.lkit.demo.redis.repo.UserRepository;
-import org.apache.tomcat.util.log.SystemLogHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
@@ -17,8 +14,6 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -92,10 +87,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 	private ListOperations<String, String> srt_listOps;
 
 
-
-
-
-
 	/**
 	 * hash operations for redisTemplate
 	 */
@@ -161,8 +152,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		message.setAutor(SimpleSecurity.getName());
 
-
-
 		message.setId(id);
 
 		message.setDeleted("0");
@@ -192,9 +181,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 
 	@Override
-	public List<String> getAllMessages() {
-
-
+	public List<String> getMessagesAll() {
 		return getMessagesInRange(0, -1);
 	}
 
@@ -203,51 +190,40 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
 	@Override
-	public Map<String, Message> getMessageGlobal() {
+	public List<Message> getMessagesGlobal() {
 
-		Map<String, Message> mapResult = new HashMap<>();
+		List<Message> resultList = new ArrayList<>();
 
-		for (String s: getAllMessages()) {
-
-			mapResult.put(s, getMessage(s));
-
-
+		for (String s: getMessagesAll()) {
+			resultList.add(getMessage(s));
 		}
 
-		return mapResult;
+		return resultList;
 	}
 
 	@Override
+    public List<Message> getMessageFollow(String user) {
 
         List<Message> resultMessages = new ArrayList<Message>();
-		//Map<String, User> mapUser = new HashMap<>();
-		Set<String> setUser; //TODO Object or String?
+		Set<String> setUser;
 		List<String> listMessage = new ArrayList<>();
 		setUser = stringRedisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
 
 		System.out.println("Set Key: "+ KEY_FOLLOWING_USER + user);
-		setUser = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + user);
-
 		System.out.println("getMessageFollow pre for setUser");
-		for (Object id : setUser) {
+		for (String id : setUser) {
+            listMessage.addAll(getMessageUser(id));
+        }
 
-
-			listMessage.addAll(getMessageUser(id.toString()));
-		}
 		//Füge eigene Tweets zur persönlichen Timeline hinzu.
 		listMessage.addAll(getMessageUser(user));
 
 		System.out.println("getMessageFollow pre for listMessage");
 		for (String s: listMessage) {
-			mapMassages.put(s, getMessage(s));
-
+            resultMessages.add(getMessage(s));
 		}
 
-
-
-
-
-		return mapMassages;
+		return resultMessages;
 	}
 
 
