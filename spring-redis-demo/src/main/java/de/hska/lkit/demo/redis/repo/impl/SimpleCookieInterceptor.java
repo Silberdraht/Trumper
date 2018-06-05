@@ -39,35 +39,21 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) throws Exception {
 
-        System.out.println("Cookie preHandle wird aufgerufen");
-
-
         Cookie[] cookies = req.getCookies();
         if (cookies != null) { //if (!ObjectUtils.isEmpty(cookies))
             System.out.println("first if");
             for (Cookie cookie : cookies)
                 if (cookie.getName().equals("auth")) {
-                    System.out.println(cookie.getName());
                     String auth = cookie.getValue();
-                    System.out.println("Dies steht in Auth Cookie: " + auth);
                     if (auth != null) {
-                        System.out.println("CL auth != null");
 
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
-
-                        System.out.println("uid durch cookie " + uid);
                         if (uid != null) {
-                            System.out.println("uid != null");
-                            //String name2 = (String) template.boundHashOps(uid).get("name");
                             String name = (String) template.opsForHash().get(uid, "username");
-                            System.out.println("Füttere SimpleSec");
-                            System.out.println(name);
-                            System.out.println(uid);
-                            SimpleSecurity.setUser(name, uid);
+                            System.out.println("Thread Login:" + Thread.currentThread().getId());
 
-                            System.out.println("10. prehandle done");
-                            //System.out.println();
+                            SimpleSecurity.setUser(name, uid);
 
                             return true;
                         }
