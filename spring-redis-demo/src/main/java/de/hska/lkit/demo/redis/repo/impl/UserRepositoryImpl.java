@@ -71,24 +71,19 @@ public class UserRepositoryImpl implements UserRepository {
 	 */
 	private ZSetOperations<String, String> srt_zSetOps;
 
-
 	/**
 	 * hash operations for redisTemplate
 	 */
 	@Resource(name="redisTemplate")
 	private HashOperations<String, String, User> rt_hashOps;
-	
-	
-	/* 
-	 * 
-	 */
+
+
 	@Autowired
 	public UserRepositoryImpl(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
 		this.redisTemplate = redisTemplate;
 		this.stringRedisTemplate = stringRedisTemplate;
 		this.u_id = new RedisAtomicLong("u_id", stringRedisTemplate.getConnectionFactory());
 	}
-
 	
 	@PostConstruct
 	private void init() {
@@ -98,7 +93,6 @@ public class UserRepositoryImpl implements UserRepository {
 		srt_simpleOps = stringRedisTemplate.opsForValue();
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -109,14 +103,13 @@ public class UserRepositoryImpl implements UserRepository {
 	public void saveUser(User user) {
 		// generate a unique id
 		String id = String.valueOf(u_id.incrementAndGet());
-
 		user.setId(id);
+		String username = user.getUsername();
+        String key = KEY_PREFIX_USER + id;
 
         srt_simpleOps.increment("user_count", 1);
-		String key = KEY_PREFIX_USER + user.getId();
-		srt_hashOps.put(key, "u_id", id);
 
-        String username = user.getUsername();
+		srt_hashOps.put(key, "u_id", id);
         srt_hashOps.put(key, "username", username);
 		srt_hashOps.put(key, "password", user.getPassword());
 
@@ -137,22 +130,19 @@ public class UserRepositoryImpl implements UserRepository {
 	public Map<String, User> getAllUsers() {
 		return rt_hashOps.entries(KEY_HASH_ALL_USERS);
 	}
-
 	
 	@Override
 	public User getUser(String username) {
 		User user = new User();
 
-		// if username is in set for all usernames, 
+		// if username is in set with all usernames
 		if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, username)) {
 
-			System.out.println("isMember wird aufgerufen");
 			// get the user data out of the hash object with key "'user:' + username"
-			String key = username;
+            String u_id = srt_simpleOps.get(username);
+            String key = KEY_PREFIX_USER + u_id;
 
-			System.out.println("isMember wird aufgerufen");
-
-			user.setId(srt_hashOps.get(key, "id"));
+			user.setId(srt_hashOps.get(key, "u_id"));
 			user.setUsername(srt_hashOps.get(key, "username"));
 			user.setPassword(srt_hashOps.get(key, "password"));
 
@@ -161,7 +151,6 @@ public class UserRepositoryImpl implements UserRepository {
 
 		return user;
 	}
-
 
 	@Override
 	public Map<String, User> findUsersWith(String pattern) {
@@ -254,8 +243,6 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 
 	public boolean auth(String uname, String pass) {
-
-
 		String uid = getIdByName(uname);
 
 		if (uid == null) {

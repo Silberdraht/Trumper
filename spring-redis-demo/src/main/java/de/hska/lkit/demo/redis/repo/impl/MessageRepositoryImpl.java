@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
 
-
 /**
  * @author Silberdraht
  *
@@ -23,10 +22,6 @@ import java.util.*;
 @Repository
 public class MessageRepositoryImpl implements MessageRepository {
 
-
-	/**
-	 *
-	 */
 	private static final String KEY_SET_ALL_USERNAMES 	= "all:usernames";
 
 	private static final String KEY_ZSET_ALL_USERNAMES 	= "all:usernames:sorted";
@@ -41,16 +36,12 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_LIST_MESSAGE_USER = "m:";
 
-
 	private static final String KEY_FOLLOWING_USER = "following:";
-
 
 	/**
 	 * to generate unique ids for message
 	 */
 	private RedisAtomicLong m_id;
-
-
 
 	/**
 	 * to save data in String format
@@ -83,9 +74,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 	 */
 	private ZSetOperations<String, String> srt_zSetOps;
 
-
 	private ListOperations<String, String> srt_listOps;
-
 
 	/**
 	 * hash operations for redisTemplate
@@ -111,31 +100,19 @@ public class MessageRepositoryImpl implements MessageRepository {
 		srt_listOps = stringRedisTemplate.opsForList();
 	}
 
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * hska.iwi.vslab.repo.UserRepository#saveUser(hska.iwi.vslab.model.User)
-	 */
-	//@Override
+	/*	public MessageRepositoryImpl(String id) {
 
-
-	public MessageRepositoryImpl(String id) {
-
-	}
+	}*/
 
 	@Override
 	public Message getMessage(String id) {
 		Message message = new Message();
 
-			//System.out.println("getMessage IF");
             message.setId(id);
 			message.setTimestamp(srt_hashOps.get(id, "Zeitstempel"));
 			message.setAutor(srt_hashOps.get(id, "Autor"));
 			message.setText(srt_hashOps.get(id, "Inhalt"));
 			message.setDeleted(srt_hashOps.get(id, "Geloescht"));
-
 
 		return message;
 	}
@@ -143,27 +120,19 @@ public class MessageRepositoryImpl implements MessageRepository {
 	@Override
 	public void postMessage(String text) {
 
-		//unique id
 		String id = String.valueOf(m_id.incrementAndGet());
 
 		Message message = new Message();
-
 		message.setText(text);
-
 		message.setAutor(SimpleSecurity.getName());
-
 		message.setId(id);
-
 		message.setDeleted("0");
-
 
 		Object timeObject = redisTemplate.execute(RedisServerCommands::time);
 		message.setTimestamp(timeObject.toString());
 
 		Date time = new Date((long)timeObject);
-
 		message.setTimestamp(time.toString());
-
 
 		String key = KEY_HASH_MESSAGE + id;
 
@@ -176,8 +145,6 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 		System.out.println("Key für Liste: " + KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid());
 		srt_listOps.rightPush(KEY_LIST_MESSAGE_USER + SimpleSecurity.getUid(), key);
-
-
 	}
 
 	@Override

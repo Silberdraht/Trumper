@@ -42,7 +42,6 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
         Cookie[] cookies = req.getCookies();
         if (cookies != null) { //if (!ObjectUtils.isEmpty(cookies))
-            System.out.println("first if");
             for (Cookie cookie : cookies)
                 if (cookie.getName().equals("auth")) {
                     String auth = cookie.getValue();
@@ -52,7 +51,6 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
                         if (uid != null) {
                             String name = (String) template.opsForHash().get(uid, "username");
-                            System.out.println("Thread Login:" + Thread.currentThread().getId());
 
                             SimpleSecurity.setUser(name, uid);
 

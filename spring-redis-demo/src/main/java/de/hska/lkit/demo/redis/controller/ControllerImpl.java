@@ -8,6 +8,7 @@ import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -20,6 +21,13 @@ import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
 public class ControllerImpl {
+
+    class SearchWrapper {
+        public String searchText;
+
+        public SearchWrapper() {
+        }
+    }
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
@@ -186,15 +194,6 @@ public class ControllerImpl {
         return "login";
     }
 
-
-    @RequestMapping(value = "/userlist", method = RequestMethod.GET)
-    public String getAllUsers(Model model) {
-        Collection<User> retrievedUsers = userRepository.getAllUsers().values();
-        model.addAttribute("users", retrievedUsers);
-
-        return "users";
-    }
-
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
         boolean test = simpleCookieInterceptor.preHandle(request, response, model);
@@ -246,35 +245,36 @@ public class ControllerImpl {
     @RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
     public String getOneUsers(@PathVariable("username") String username, Model model, HttpServletResponse res, HttpServletRequest req) throws Exception{
         if(simpleCookieInterceptor.preHandle(req, res, model)) {
-            System.out.println(username);
-
-            User found = userRepository.getUser(SimpleSecurity.getUid());
-            System.out.println(found.getUsername());
+            User found = userRepository.getUser(SimpleSecurity.getName());
+            System.out.println("Gefundener Nutzer:" + found.getUsername());
             model.addAttribute("userFound", found.getUsername());
+            model.addAttribute("user", found);
             return "oneUser";
         }
         return "redirect:/login";
 
     }
 
-
     /**
      * search usernames containing the sequence of characters
      *
-     * @param username
+     * @param searchPattern
      *            User object filled in form
      * @param model
      * @return
      */
     @RequestMapping(value = "/searchuser", method = RequestMethod.POST)
-    public String searchUser(@ModelAttribute String username, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
-        if(simpleCookieInterceptor.preHandle(req, res, model)) {
+    public String searchUser(@ModelAttribute SearchWrapper searchPattern, BindingResult result, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+        if(simpleCookieInterceptor.preHandle(req, res, model) && !(result.hasErrors())) {
+            // model.addAttribute("searchPattern", new SearchWrapper());
             List<User> retrievedUsers = new ArrayList<>();
-            String uid = SimpleSecurity.getUid();
+            String currentUser = SimpleSecurity.getName();
+
             List<Boolean> isFollowing = new ArrayList<>();
-            retrievedUsers.addAll(userRepository.findUsersWith(username).values());
-            Map<String, User> following = userRepository.getFollowing(uid);
+            retrievedUsers.addAll(userRepository.findUsersWith(searchPattern.searchText).values());
+            Map<String, User> following = userRepository.getFollowing(currentUser);
             for (User user : retrievedUsers) {
+
                 isFollowing.add(following.containsValue(user));
             }
             System.out.println(isFollowing.size() == retrievedUsers.size());
