@@ -16,7 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -54,15 +56,21 @@ public class ControllerImpl {
                                  @ModelAttribute Message message,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
-        //System.out.println("Msg Rep wird aufgerufen");
+        //System.out.println("Msg Rep wird aufgerufen")
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
-            int i = 0;
+
+            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
             int offset = (page - 1) * pagelength;
-            Map<String, Message> pagedMessages = new HashMap<>();
-            for (Map.Entry<String, Message> entry : retrievedMessages.entrySet()) {
-                if (i >= offset && i < offset + pagelength) {
-                    pagedMessages.put(entry.getKey(), entry.getValue());
+            List<Message> pagedMessages = new ArrayList<>();
+
+            int i = 0;
+            for (Message currentMessage : retrievedMessages) {
+                if (i >= offset) {
+                    if (i < offset + pagelength) {
+                        pagedMessages.add(currentMessage);
+                    } else {
+                        break; //for performance
+                    }
                 }
                 i += 1;
             }
@@ -105,15 +113,13 @@ public class ControllerImpl {
     public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
 
         if(simpleCookieInterceptor.preHandle(request, response, model)){
-            Map<String, Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
+            List<Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
             model.addAttribute("messages", retrievedMessages);
             return "messagesFollow";
 
         }
         return "login";
     }
-
-
 
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
@@ -123,7 +129,7 @@ public class ControllerImpl {
             messageRepository.postMessage(message.getText());
             model.addAttribute("messages");
 
-            Map<String, Message> retrievedMessages = messageRepository.getMessageGlobal();
+            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
             model.addAttribute("messages", retrievedMessages);
 
 
@@ -136,6 +142,7 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
+
     public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
         System.out.println("GET addFollow");
@@ -217,7 +224,6 @@ public class ControllerImpl {
     }
 
 
-
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
 
@@ -232,7 +238,7 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-            model.addAttribute("msg", "User successfully added");
+            //model.addAttribute("msg", "User successfully added");
             System.out.println("New User added to DB");
             return "redirect:/messages?";
 
@@ -317,16 +323,7 @@ public class ControllerImpl {
         model.addAttribute("users", retrievedUsers);
         return "users";
     }
-/*
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logoutGet(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
-        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
-        System.out.println("logout " + test);
-
-
-        return "logout"; }
-*/
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public String logout() {
 
