@@ -192,9 +192,9 @@ public class ControllerImpl {
     }
 
 
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @RequestMapping(value = "/userlist", method = RequestMethod.GET)
     public String getAllUsers(Model model) {
-        Map<String, User> retrievedUsers = userRepository.getAllUsers();
+        Collection<User> retrievedUsers = userRepository.getAllUsers().values();
         model.addAttribute("users", retrievedUsers);
 
         return "users";
@@ -251,56 +251,40 @@ public class ControllerImpl {
      */
     @RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
     public String getOneUsers(@PathVariable("username") String username, Model model) {
-        User found = userRepository.getUser(username);
+        System.out.println(username);
 
-        model.addAttribute("userFound", found);
+        User found = userRepository.getUser(SimpleSecurity.getUid());
+        System.out.println(found.getUsername());
+        model.addAttribute("userFound", found.getUsername());
         return "oneUser";
     }
 
-/*    /**
-     * redirect to page to add a new user
-     *
-     * @return
-     */
-/*    @RequestMapping(value = "/adduser", method = RequestMethod.GET)
-    public String addUser(@ModelAttribute User user) {
-        return "newUser";
-    }
-*/
-/*    /**
-     * add a new user, adds a list of all users to model
-     *
-     * @param user
-     *            User object filled in form
-     * @param model
-     * @return
-     */
-/*    @RequestMapping(value = "/adduser", method = RequestMethod.POST)
-    public String saveUser(@ModelAttribute User user, Model model) {
-
-        userRepository.saveUser(user);
-        model.addAttribute("message", "User successfully added");
-
-        Map<String, User> retrievedUsers = userRepository.getAllUsers();
-
-        model.addAttribute("users", retrievedUsers);
-        return "users";
-    }
-*/
 
     /**
      * search usernames containing the sequence of characters
      *
-     * @param user
+     * @param username
      *            User object filled in form
      * @param model
      * @return
      */
-    @RequestMapping(value = "/searchuser/{pattern}", method = RequestMethod.GET)
-    public String searchUser(@PathVariable("pattern") String pattern, @ModelAttribute User user, Model model) {
+    @RequestMapping(value = "/searchuser", method = RequestMethod.POST)
+    public String searchUser(@ModelAttribute String username, HttpServletRequest req, Model model) {
 
-        Map<String, User> retrievedUsers = userRepository.findUsersWith(pattern);
-
+        Collection<User> retrievedUsers = userRepository.findUsersWith(username).values();
+        String uid = simpleCookieInterceptor.getCookieUID(req);
+        Map<String, User> following = userRepository.getFollowing(uid);
+        List<Boolean> isFollowing = new LinkedList<>();
+        for (User user : retrievedUsers){
+            if (following.containsValue(user)) {
+                isFollowing.add(true);
+            }
+            else {
+                isFollowing.add(false);
+            }
+        }
+        System.out.println(isFollowing.size() == retrievedUsers.size());
+        model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("users", retrievedUsers);
         return "users";
     }

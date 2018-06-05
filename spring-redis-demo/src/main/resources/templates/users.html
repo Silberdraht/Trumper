@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>List all users</title>
+<title>Trumper</title>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,22 +12,20 @@
 <body>
 	<div class="container">
 
-		<h3>all Users</h3>
+		<h3>Found Users</h3>
 
 		<table class="table">
 			<thead>
 				<tr>
-					<th>id</th>
-					<th>key</th>
 					<th>username</th>
+					<th>follow status</th>
 				</tr>
 			</thead>
 
 			<tbody>
-				<tr th:each="element : ${users}">
-					<td th:text="${element.value.id}">id</td>
-					<td th:text="${element.key}">key</td>
-					<td th:text="${element.value.username}">Some name</td>
+				<tr th:each="element, iter : ${users}">
+					<td th:text="${element.username}">Some name</td>
+					<td th:text="${isFollowing[iter.index]}"></td>
 				</tr>
 			</tbody>
 		</table>
