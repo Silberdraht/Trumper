@@ -1,10 +1,6 @@
 package de.hska.lkit.demo.redis.repo;
 
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import de.hska.lkit.demo.redis.model.User;
 
 import java.util.Map;
@@ -55,6 +51,8 @@ public interface UserRepository {
 	public String getUserCount();
 
 	public String getIdByName(String name);
+
+    public User getUserById(String key);
 
 	public String getPassword(String u_id);
 

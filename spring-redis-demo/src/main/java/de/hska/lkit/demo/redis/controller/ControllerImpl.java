@@ -15,7 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @org.springframework.stereotype.Controller
@@ -27,7 +29,8 @@ public class ControllerImpl {
 
     @Autowired
     private static final Duration TIMEOUT = Duration.ofMinutes(15);
-    public ControllerImpl(MessageRepository messageRepository,UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
+
+    public ControllerImpl(MessageRepository messageRepository, UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
         super();
 
         this.messageRepository = messageRepository;
@@ -36,168 +39,98 @@ public class ControllerImpl {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index(Model model){
+    public String index(Model model) {
         return "redirect:/login";
     }
-
- /*   @RequestMapping(value = "/messages", method = RequestMethod.POST)
-    public String reqALLMessagesPage(Model model) {
-        return "redirect:/messages?";
-    }*/
 
     //", @RequestParam(defaultValue = "0") int page" was added in order to implement pageination -noah
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public String getAllMessages(Model model, HttpServletResponse response, HttpServletRequest request,
                                  @ModelAttribute Message message,
+                                 @ModelAttribute("querry") Message querry,
                                  @RequestParam(defaultValue = "1") int page,
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
-        if (simpleCookieInterceptor.preHandle(request, response, model)) {
 
-            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+            model.addAttribute("loggedOn", SimpleSecurity.getName());
+
+            List<String> retrievedMessages = messageRepository.getMessageIsDsAll();
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages = new ArrayList<>();
 
-            int i = 0;
-            for (Message currentMessage : retrievedMessages) {
-                if (i >= offset) {
-                    if (i < offset + pagelength) {
-                        pagedMessages.add(currentMessage);
+            int j;
+            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
+                j = retrievedMessages.size() - i - 1;
+                if (j >= offset) {
+                    if (j < offset + pagelength) {
+                        String m_id = retrievedMessages.get(j);
+                        pagedMessages.add(messageRepository.getMessage(m_id));
                     } else {
                         break; //for performance
                     }
                 }
-                i += 1;
             }
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
             int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
-            if (pagesRequired == 0) {
+            if (pagesRequired <= 0) {
                 pagesRequired = 1;
             }
             model.addAttribute("size", pagesRequired);
-            return "messages";
+            return "/messages";
         }
         return "redirect:/login";
     }
 
 
-    @RequestMapping(value = "/following", method = RequestMethod.GET)
-    public String getAllFollowers(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)){
-            Map<String, User> retrievedUsers = userRepository.getFollowing(SimpleSecurity.getUid());
-            model.addAttribute("users", retrievedUsers);
-            return "following";
-        }
-        return "login";
-    }
-
-    @RequestMapping(value = "/followers", method = RequestMethod.GET)
-    public String getFollowedBy(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)){
-            Map<String, User> retrievedUsers = userRepository.getFollowers(SimpleSecurity.getUid());
-            model.addAttribute("users", retrievedUsers);
-            return "followers";
-        }
-        return "login";
-    }
-
-    @RequestMapping(value = "/messagesfollow", method = RequestMethod.GET)
-    public String getAllMessagesFollowed(Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)){
-            List<Message> retrievedMessages = messageRepository.getMessageFollow(SimpleSecurity.getUid());
-            model.addAttribute("messages", retrievedMessages);
-            return "messagesFollow";
-
-        }
-        return "login";
-    }
-
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
-    public String postMessage(@ModelAttribute Message message, @RequestParam(defaultValue = "1") int page, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            messageRepository.postMessage(message.getText());
-            model.addAttribute("messages");
-
-            List<Message> retrievedMessages = messageRepository.getMessagesGlobal();
-            model.addAttribute("messages", retrievedMessages);
-
-
-            return "redirect:/messages?page="+page;
+    public String postMessage(@ModelAttribute Message message, @ModelAttribute("querry") Message querry,
+                              Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+            messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
+            return "redirect:/messages";
 
         }
-
-        return "login";
+        return "redirect:/login";
     }
 
 
-    @RequestMapping(value = "/addfollow", method = RequestMethod.GET)
-
-    public String addFollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            return "addFollow";
+    @RequestMapping(value = "/searchuser/follow", method = RequestMethod.POST)
+    public String addFollow(Model model, HttpServletResponse response, HttpServletRequest request,
+                            @ModelAttribute User user,
+                            @RequestParam String element) throws Exception {
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+            String followedUserID = userRepository.getIdByName(element);
+            userRepository.followUser(SimpleSecurity.getUid(), followedUserID);
+            //messageRepository.followMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
+            return "redirect:/messages";
         }
 
-        return "login";
+        return "redirect:/login";
+
     }
 
-    @RequestMapping(value = "/addfollow", method = RequestMethod.POST)
-    public String addFollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
+    @RequestMapping(value = "/searchuser/unfollow", method = RequestMethod.POST)
+    public String unfollow(Model model, HttpServletResponse response, HttpServletRequest request,
+                           @ModelAttribute User user,
+                           @RequestParam String element) throws Exception {
 
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+            //String followedUserID = userRepository.getIdByName(element);
+            userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(element));
+            //messageRepository.unfollowMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
 
-            userRepository.followUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
-
-
-            return "addFollow";
+            return "redirect:/messages";
         }
 
-
-        return "login";
-
+        return "redirect:/login";
     }
 
-    @RequestMapping(value = "/unfollow", method = RequestMethod.GET)
-    public String unfollow(@ModelAttribute User user, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-            return "unfollow";
-        }
-
-        return "login";
-    }
-
-    @RequestMapping(value = "/unfollow", method = RequestMethod.POST)
-    public String unfollow(@ModelAttribute User user, Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-
-        if(simpleCookieInterceptor.preHandle(request, response, model)) {
-
-            userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(user.getUsername()));
-
-
-            return "unfollow";
-        }
-
-        return "login";
-    }
-
-
-    @RequestMapping(value = "/userlist", method = RequestMethod.GET)
-    public String getAllUsers(Model model) {
-        Collection<User> retrievedUsers = userRepository.getAllUsers().values();
-        model.addAttribute("users", retrievedUsers);
-
-        return "users";
-    }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        boolean test = simpleCookieInterceptor.preHandle(request, response, model);
+        //boolean test = simpleCookieInterceptor.preHandle(request, response, model);
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             return "redirect:/messages";
@@ -213,7 +146,7 @@ public class ControllerImpl {
 
             for (User u : retrievedUsers.values())
                 if (u.getUsername().equals(user.getUsername())) {
-                    //TODO Give some form of feedback, ie popup, that registering was not successful due to already existing user
+                    //TO-DO Give some form of feedback, ie popup, that registering was not successful due to already existing user
                     return "redirect:/login";
                 }
 
@@ -221,7 +154,7 @@ public class ControllerImpl {
             return "redirect:/messages?";
 
         } else {
-            if(userRepository.auth(user.getUsername(), user.getPassword())) {
+            if (userRepository.auth(user.getUsername(), user.getPassword())) {
                 String auth = userRepository.addAuth(user.getUsername(), TIMEOUT.getSeconds(), TimeUnit.SECONDS);
                 Cookie cookie = new Cookie("auth", auth);
                 response.addCookie(cookie);
@@ -238,49 +171,79 @@ public class ControllerImpl {
     /**
      * get information for user with username
      *
-     * @param username
-     *            username to find
+     * @param username username to find
      * @param model
      * @return
      */
     @RequestMapping(value = "/user/{username}", method = RequestMethod.GET)
-    public String getOneUsers(@PathVariable("username") String username, Model model, HttpServletResponse res, HttpServletRequest req) throws Exception{
-        if(simpleCookieInterceptor.preHandle(req, res, model)) {
-            System.out.println(username);
+    public String getOneUser(@PathVariable("username") String username, Model model, HttpServletResponse res, HttpServletRequest req) throws Exception {
+        if (simpleCookieInterceptor.preHandle(req, res, model)) {
+            model.addAttribute("loggedOn", SimpleSecurity.getName());
 
-            User found = userRepository.getUser(SimpleSecurity.getUid());
-            System.out.println(found.getUsername());
-            model.addAttribute("userFound", found.getUsername());
-            return "oneUser";
+            User found = userRepository.getUser(username);
+            String name = found.getUsername();
+            String id = userRepository.getIdByName(name);
+
+            //Map<String, User> followers = userRepository.getFollowers(id);
+            //Map<String, User> following = userRepository.getFollowing(id);
+            model.addAttribute("userFound", name);
+            model.addAttribute("followers", userRepository.getFollowers(id));
+            model.addAttribute("following", userRepository.getFollowing(id));
+            return "foundUser";
         }
         return "redirect:/login";
 
     }
 
+    //Preventing Error-Page (Nice to have)
+    @RequestMapping(value = {"/user/","/users","/user"}, method = RequestMethod.GET)
+    public String getUserWithoutName(Model model, HttpServletResponse res, HttpServletRequest req) throws Exception {
+        if (simpleCookieInterceptor.preHandle(req, res, model)) {
+            return "redirect:/searchusers";
+        }
+        return "redirect:/login";
+    }
+
+    //needed for getUserWithoutName, preventing Error-Pages - also for /searchuser call
+    @RequestMapping(value = "/searchusers", method = RequestMethod.GET)
+    public String foundUser(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+        if (simpleCookieInterceptor.preHandle(req, res, model)) {
+            return searchUser(new Message("","","",""),req,res,model);
+        }
+        return "redirect:/login";
+    }
 
     /**
      * search usernames containing the sequence of characters
      *
-     * @param username
-     *            User object filled in form
+     * @param querry User object filled in form
      * @param model
      * @return
      */
-    @RequestMapping(value = "/searchuser", method = RequestMethod.POST)
-    public String searchUser(@ModelAttribute String username, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
-        if(simpleCookieInterceptor.preHandle(req, res, model)) {
-            List<User> retrievedUsers = new ArrayList<>();
+    @RequestMapping(value = "/searchusers", method = RequestMethod.POST)
+    public String searchUser(@ModelAttribute("querry") Message querry, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+        if (simpleCookieInterceptor.preHandle(req, res, model)) {
+            model.addAttribute("loggedOn", SimpleSecurity.getName());
+
             String uid = SimpleSecurity.getUid();
+            List<User> retrievedUsers = new ArrayList<>();
             List<Boolean> isFollowing = new ArrayList<>();
-            retrievedUsers.addAll(userRepository.findUsersWith(username).values());
+            retrievedUsers.addAll(userRepository.findUsersWith(querry.getText()).values());
             Map<String, User> following = userRepository.getFollowing(uid);
             for (User user : retrievedUsers) {
-                isFollowing.add(following.containsValue(user));
+                String name = user.getUsername();
+                boolean follows = false;
+                for (User comp : following.values()) {
+                    if (comp != null && comp.getUsername().equals(name)) {
+                        follows = true;
+                        break;
+                    }
+                }
+                isFollowing.add(follows);
             }
-            System.out.println(isFollowing.size() == retrievedUsers.size());
             model.addAttribute("isFollowing", isFollowing);
             model.addAttribute("users", retrievedUsers);
-            return "users";
+            return "searchusers";
         }
         return "redirect:/login";
     }
@@ -294,4 +257,47 @@ public class ControllerImpl {
         }
         return "redirect:/login";
     }
+
+    @RequestMapping(value = "/own_messages", method = RequestMethod.GET)
+    public String getOwnTimeline(Model model, HttpServletResponse response, HttpServletRequest request,
+                                 @ModelAttribute("querry") Message querry,
+                                 @ModelAttribute String username,
+                                 @ModelAttribute Message message,
+                                 @RequestParam(defaultValue = "1") int page,
+                                 @RequestParam(defaultValue = "5") int pagelength) throws Exception {
+        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+            model.addAttribute("loggedOn", SimpleSecurity.getName());
+
+            List<String> retrievedMessages = messageRepository.getMessageIDsTimeline(SimpleSecurity.getUid());
+            //List<Message> retrievedMessages = messageRepository.getMessagesTimeline(SimpleSecurity.getUid());
+            //retrievedMessages.sort((Message m1, Message m2) -> m2.getId().compareTo(m1.getId()));
+            int offset = (page - 1) * pagelength;
+            List<Message> pagedMessages = new ArrayList<>();
+
+            int j;
+            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
+                j = retrievedMessages.size() - i - 1;
+                if (j >= offset) {
+                    if (j < offset + pagelength) {
+                        pagedMessages.add(messageRepository.getMessage(retrievedMessages.get(j))); //TODO check order
+                    } else {
+                        break; //for performance
+                    }
+                }
+            }
+            model.addAttribute("current", page);
+            model.addAttribute("messages", pagedMessages);
+            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+            if (pagesRequired == 0) {
+                pagesRequired = 1;
+            }
+            model.addAttribute("size", pagesRequired);
+            return "own_messages";
+        }
+        return "redirect:/login";
+    }
+
+
+
+
 }

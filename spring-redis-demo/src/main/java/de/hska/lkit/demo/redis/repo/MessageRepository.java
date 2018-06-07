@@ -1,27 +1,29 @@
 package de.hska.lkit.demo.redis.repo;
 
 import de.hska.lkit.demo.redis.model.Message;
-import javafx.collections.transformation.SortedList;
+import de.hska.lkit.demo.redis.model.User;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface MessageRepository {
 
-
-
     public Message getMessage(String id);
 
+    public void postMessage(String text, Map<String, User> followers);
 
-    public void postMessage(String text);
-
-    public List<String> getMessagesAll();
+    public List<String> getMessageIsDsAll();
 
     public List<Message> getMessagesGlobal();
 
-    public List<Message> getMessageFollow(String user);
+    public List<String> getMessageIDsUser(String user);
 
-    public List<String> getMessageUser(String id);
+    List<Message> getMessagesTimeline(String userID);
+
+    /*public void followMessagesFromUser(String uid, String followedUserID);
+
+    public void unfollowMessagesFromUser(String userID, String followedUserID);*/
+
+    List<String> getMessageIDsTimeline(String userID);
 
 }

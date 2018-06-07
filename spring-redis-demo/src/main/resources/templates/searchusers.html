@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Trumper</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link th:href="@{/webjars/bootstrap/3.3.4/css/bootstrap.min.css}" rel="stylesheet" media="screen" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous"/>
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-light bg-light">
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Trumper.
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" th:href="@{/user/} + ${loggedOn}" >Show my profile</a>
+                        <a class="dropdown-item" th:text="'Logged on as ' + ${loggedOn}"></a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item">
+                            <form class="form" th:action="@{/logout}" method="post">
+                                <button type="submit" class="btn btn-error">Leave the US. (log out)</button>
+                            </form>
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/messages">Switch to global news timeline</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/own_messages">Switch to own news timeline</a>
+                </li>
+            </ul>
+            <!--
+            <form class="form-inline my-2 my-lg-0" th:action="@{/searchusers}" method="post">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search for Great American Citizens.." aria-label="Search" th:object="${username}"/>
+                <button class="btn btn-default" type="submit">
+                    <span class="glyphicon glyphicon-search"></span> Search</button>
+            </form>
+            -->
+        </div>
+    </header>
+
+	<div class="container">
+
+        <div class="panel panel-default">
+            <div class="panel header"><h3>Found Users</h3></div>
+            <div class="panel body">
+                <div class="row">
+                    <div class="col-lg-6 col-m-6 col-sm-6 col-xs-6">
+                        <h4 th:text="Username"></h4>
+                            <div class="panel panel-default" th:each="element, iter : ${users}">
+                                <a th:href="@{/user/} + ${element.username}" th:type="submit" th:text="${element.username}"></a>
+                                <div align="right"><form th:action="@{/login}" method="get"><button class="btn btn-default">Trumper.</button></form></div> <!-- arbitrary form/button that can be removed, as soon as CSS covers aligning of rows-->
+                            </div>
+                    </div>
+                    <div class="col-lg-6 col-m-6 col-sm-6 col-xs-6">
+                        <h4 th:text="Follow-Status"></h4>
+                            <div class="panel panel-default" th:each="element, iter : ${users}">
+                                <form class="form" th:if="!${isFollowing[iter.index]}" th:action="@{/searchuser/follow}" method="post">
+                                    <button class="btn btn-error" th:type="submit" th:text="Follow" th:value="${element.username}" name="element"></button>
+                                    <div>(You aren't following this user.)</div>
+                                </form>
+                                <form class="form" th:if="${isFollowing[iter.index]}" th:action="@{/searchuser/unfollow}" method="post">
+                                    <button class="btn btn-success" th:type="submit" th:text="Following" th:value="${element.username}" name="element"></button>
+                                    <div>(You are following this user. Nice!)</div>
+                                </form>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+</body>
+</html>

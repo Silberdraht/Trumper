@@ -1,14 +1,11 @@
 
 package de.hska.lkit.demo.redis.repo.impl;
 
-import com.sun.deploy.net.HttpResponse;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.annotation.Resource;
@@ -42,7 +39,6 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
 
         Cookie[] cookies = req.getCookies();
         if (cookies != null) { //if (!ObjectUtils.isEmpty(cookies))
-            System.out.println("first if");
             for (Cookie cookie : cookies)
                 if (cookie.getName().equals("auth")) {
                     String auth = cookie.getValue();
@@ -51,8 +47,7 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                         String uid = template.opsForValue().get("auth:" + auth + ":uid");
 
                         if (uid != null) {
-                            String name = (String) template.opsForHash().get(uid, "username");
-                            System.out.println("Thread Login:" + Thread.currentThread().getId());
+                            String name = (String) template.opsForHash().get("user:" + uid, "username");
 
                             SimpleSecurity.setUser(name, uid);
 
@@ -61,6 +56,6 @@ public class SimpleCookieInterceptor extends HandlerInterceptorAdapter {
                     }
                 }
         }
-        return false; //return true;
+        return false;
     }
 }
