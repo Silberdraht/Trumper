@@ -1,6 +1,6 @@
 package de.hska.lkit.demo.redis.repo.impl;
 
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisZSetCommands.Range;

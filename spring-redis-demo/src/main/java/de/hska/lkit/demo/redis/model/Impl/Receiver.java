@@ -12,11 +12,15 @@ public class Receiver {
         this.messageRepository = messageRepository;
     }
 
-    public void receiveMessage(String m_key) {
-        System.out.println(m_key);
-        String[] split = m_key.split("m:");
-        m_key = "m:" + split[split.length - 1];
-        System.out.println(m_key);
-        messageRepository.post(m_key);
+    public void receiveMessage(String data) {
+
+        int split = data.indexOf("|");
+
+        int userIdLength = Integer.parseInt(data.substring(0, split));
+        String userId = data.substring(split + 1, split + userIdLength + 1);
+        String message = data.substring(split + userIdLength + 1);
+
+        messageRepository.insertVeetLocally(userId, message);
+
     }
 }

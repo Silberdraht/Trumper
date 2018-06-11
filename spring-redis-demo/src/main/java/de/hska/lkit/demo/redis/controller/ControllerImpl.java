@@ -1,15 +1,14 @@
 package de.hska.lkit.demo.redis.controller;
 
-import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.Impl.Message;
+import de.hska.lkit.demo.redis.model.Impl.RedisMessageSubscriber;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 
 @org.springframework.stereotype.Controller
 public class ControllerImpl {
@@ -99,7 +99,9 @@ public class ControllerImpl {
     public String postMessage(@ModelAttribute Message message, @ModelAttribute("querry") Message querry,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
+            Message postMessage = messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
+            RedisMessageSubscriber redisMessageSubscriber = new RedisMessageSubscriber();
+            redisMessageSubscriber.onMessage(postMessage.getText(),);
             return "redirect:/messages";
         }
         return "redirect:/login";
@@ -161,6 +163,7 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
+
             return "redirect:/messages?";
 
         } else {
