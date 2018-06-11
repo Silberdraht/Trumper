@@ -1,7 +1,7 @@
 /**
 package de.hska.lkit.demo.redis.controller;
 
-import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.Impl.Message;
 
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 

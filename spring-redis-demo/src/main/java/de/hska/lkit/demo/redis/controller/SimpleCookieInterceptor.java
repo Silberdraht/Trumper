@@ -34,7 +34,7 @@ import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.stereotype.Repository;
 
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 
 

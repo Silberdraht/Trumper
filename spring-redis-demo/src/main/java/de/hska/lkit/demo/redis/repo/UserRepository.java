@@ -1,7 +1,7 @@
 package de.hska.lkit.demo.redis.repo;
 
 
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
