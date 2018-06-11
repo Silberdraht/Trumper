@@ -10,7 +10,7 @@ public interface MessageRepository {
 
     public Message getMessage(String id);
 
-    public void postMessage(String text, Map<String, User> followers);
+    public Message postMessage(String text, Map<String, User> followers);
 
     public List<String> getMessageIsDsAll();
 

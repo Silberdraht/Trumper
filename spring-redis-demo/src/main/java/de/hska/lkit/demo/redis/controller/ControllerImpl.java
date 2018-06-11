@@ -6,7 +6,11 @@ import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +30,9 @@ public class ControllerImpl {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final SimpleCookieInterceptor simpleCookieInterceptor;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     private static final Duration TIMEOUT = Duration.ofMinutes(15);
@@ -70,6 +77,10 @@ public class ControllerImpl {
     }
 
 
+    @MessageMapping("/messages/addmessage")
+    public void post(Message postedMessage) throws Exception {
+        messagingTemplate.convertAndSend("/own_messages", postedMessage);
+    }
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
     public String postMessage(@ModelAttribute Message message,
@@ -77,7 +88,6 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
             return "redirect:/messages";
-
         }
         return "redirect:/login";
     }
