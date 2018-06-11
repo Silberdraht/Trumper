@@ -116,7 +116,7 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 
 	@Override
-	public void postMessage(String text, Map<String, User> followers) {
+	public Message postMessage(String text, Map<String, User> followers) {
 
 		String m_id = String.valueOf(this.m_id.incrementAndGet());
         String u_id = SimpleSecurity.getUid();
@@ -159,6 +159,7 @@ public class MessageRepositoryImpl implements MessageRepository {
         for (User follower : followers.values()) {
             srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + getIDByKey(follower.getId()), key);
         }
+        return message;
     }
 
     public String getIDByKey(String key) {
