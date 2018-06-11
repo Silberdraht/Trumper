@@ -1,7 +1,7 @@
 package de.hska.lkit.demo.redis.repo;
 
-import de.hska.lkit.demo.redis.model.Message;
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.Message;
+import de.hska.lkit.demo.redis.model.Impl.User;
 
 import java.util.List;
 import java.util.Map;

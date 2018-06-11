@@ -1,19 +1,16 @@
 package de.hska.lkit.demo.redis;
 
-import com.sun.glass.ui.Application;
-import de.hska.lkit.demo.redis.model.Receiver;
+import de.hska.lkit.demo.redis.model.Impl.Receiver;
+import de.hska.lkit.demo.redis.repo.MessageRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
-
-import java.util.concurrent.CountDownLatch;
 
 @SpringBootApplication
 public class BootRedisApplication {
@@ -32,14 +29,9 @@ public class BootRedisApplication {
 		return new MessageListenerAdapter(receiver, "receiveMessage");
 	}
 	@Bean
-    Receiver receiver(CountDownLatch latch) {
-		return new Receiver(latch);
+    Receiver receiver(MessageRepository messageRepository) {
+		return new Receiver(messageRepository);
 	}
-
-    @Bean
-    CountDownLatch latch() {
-        return new CountDownLatch(1);
-    }
 
     @Bean
     StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
@@ -49,9 +41,7 @@ public class BootRedisApplication {
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = SpringApplication.run(BootRedisApplication.class, args);
         StringRedisTemplate template = ctx.getBean(StringRedisTemplate.class);
-        CountDownLatch latch = ctx.getBean(CountDownLatch.class);
         template.convertAndSend("addmessage", "THIS IS FUCKING AWEFUL!");
-        latch.await();
         System.exit(0);
     }
 
