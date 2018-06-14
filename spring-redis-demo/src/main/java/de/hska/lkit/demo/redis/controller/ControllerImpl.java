@@ -1,15 +1,12 @@
 package de.hska.lkit.demo.redis.controller;
 
-import de.hska.lkit.demo.redis.model.Impl.Message;
-import de.hska.lkit.demo.redis.model.Impl.RedisMessagePublisher;
+import de.hska.lkit.demo.redis.model.Message;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.Impl.User;
+import de.hska.lkit.demo.redis.model.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-
 @org.springframework.stereotype.Controller
 public class ControllerImpl {
 
@@ -32,13 +28,11 @@ public class ControllerImpl {
     private final SimpleCookieInterceptor simpleCookieInterceptor;
 
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
     private static final Duration TIMEOUT = Duration.ofMinutes(15);
 
     public ControllerImpl(MessageRepository messageRepository, UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
         super();
+
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.simpleCookieInterceptor = simpleCookieInterceptor;
@@ -60,25 +54,12 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
 
-            List<String> retrievedMessages = messageRepository.getMessageIsDsAll();
             int offset = (page - 1) * pagelength;
-            List<Message> pagedMessages = new ArrayList<>();
-
-            int j;
-            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
-                j = retrievedMessages.size() - i - 1;
-                if (j >= offset) {
-                    if (j < offset + pagelength) {
-                        String m_id = retrievedMessages.get(j);
-                        pagedMessages.add(messageRepository.getMessage(m_id));
-                    } else {
-                        break; //for performance
-                    }
-                }
-            }
+            List<Message> pagedMessages;
+            pagedMessages = messageRepository.getMessagesInRange(offset,offset+pagelength-1, messageRepository);
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
-            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+            long pagesRequired = (int) Math.ceil((float) messageRepository.countGlobalMessages() / pagelength);
             if (pagesRequired <= 0) {
                 pagesRequired = 1;
             }
@@ -89,19 +70,14 @@ public class ControllerImpl {
     }
 
 
-    @MessageMapping("/messages/addmessage")
-    public void post(Message postedMessage) {
-        RedisMessagePublisher redisMessagePublisher = new RedisMessagePublisher(messagingTemplate);
-        redisMessagePublisher.publish(postedMessage);
-    }
 
-    @RequestMapping(value = "/messages/addmessage", method = RequestMethod.POST)
-    public String postMessage(@ModelAttribute Message message, @ModelAttribute("querry") Message querry,
+    @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
+    public String postMessage(@ModelAttribute Message message,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            Message postMessage = messageRepository.postMessage(message.getText());
-
+            messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
             return "redirect:/messages";
+
         }
         return "redirect:/login";
     }
@@ -162,8 +138,7 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-            userRepository.getUser(user.getUsername()).setOnline(true);
-            return "redirect:/messages?page=1";
+            return "redirect:/messages?";
 
         } else {
             if (userRepository.auth(user.getUsername(), user.getPassword())) {
@@ -171,7 +146,7 @@ public class ControllerImpl {
                 Cookie cookie = new Cookie("auth", auth);
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
-                userRepository.getUser(user.getUsername()).setOnline(true);
+
 
                 return "redirect:/messages?page=1";
             }
@@ -218,7 +193,8 @@ public class ControllerImpl {
 
     //needed for getUserWithoutName, preventing Error-Pages - also for /searchuser call
     @RequestMapping(value = "/searchusers", method = RequestMethod.GET)
-    public String foundUser(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+    public String foundUser(HttpServletRequest req, HttpServletResponse res, Model model,
+                                 @ModelAttribute("querry") Message querry) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             return searchUser(new Message("","","",""),req,res,model);
         }
@@ -266,7 +242,6 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
             userRepository.deleteAuth(name);
-            userRepository.getUser(name).setOnline(false);
         }
         return "redirect:/login";
     }
@@ -281,26 +256,12 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
 
-            List<String> retrievedMessages = messageRepository.getMessageIDsTimeline(SimpleSecurity.getUid());
-            //List<Message> retrievedMessages = messageRepository.getMessagesTimeline(SimpleSecurity.getUid());
-            //retrievedMessages.sort((Message m1, Message m2) -> m2.getId().compareTo(m1.getId()));
             int offset = (page - 1) * pagelength;
-            List<Message> pagedMessages = new ArrayList<>();
-
-            int j;
-            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
-                j = retrievedMessages.size() - i - 1;
-                if (j >= offset) {
-                    if (j < offset + pagelength) {
-                        pagedMessages.add(messageRepository.getMessage(retrievedMessages.get(j))); //TODO check order
-                    } else {
-                        break; //for performance
-                    }
-                }
-            }
+            List<Message> pagedMessages;
+            pagedMessages = messageRepository.getMessagesInRange(SimpleSecurity.getUid(), offset,offset+pagelength-1, messageRepository);
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
-            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+            long pagesRequired = (long) Math.ceil((float) messageRepository.countTimelineMessages(SimpleSecurity.getUid()) / pagelength);
             if (pagesRequired == 0) {
                 pagesRequired = 1;
             }
