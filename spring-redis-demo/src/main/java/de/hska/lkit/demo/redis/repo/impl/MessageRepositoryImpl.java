@@ -181,8 +181,34 @@ public class MessageRepositoryImpl implements MessageRepository {
      * @param end
      * @return
      */
+    @Override
 	public List<String> getMessageIDsInRange(int start, int end) {
         return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, start, end);
+    }
+
+    @Override
+    public List<String> getMessageIDsInRange(String userID, int start, int end) {
+        return srt_listOps.range(KEY_LIST_MESSAGE_USER + userID, start, end);
+    }
+
+    @Override
+    public List<Message> getMessagesInRange(int start, int end, MessageRepository messageRepository) {
+        List<String> ids = getMessageIDsInRange(start, end);
+        List<Message> messages = new ArrayList<>();
+        for (String id : ids) {
+            messages.add(messageRepository.getMessage(id));
+        }
+        return messages;
+    }
+
+    @Override
+    public List<Message> getMessagesInRange(String userID,int start, int end, MessageRepository messageRepository) {
+        List<String> ids = getMessageIDsInRange(userID, start, end);
+        List<Message> messages = new ArrayList<>();
+        for (String id : ids) {
+            messages.add(messageRepository.getMessage(id));
+        }
+        return messages;
     }
 
     /**
@@ -193,6 +219,16 @@ public class MessageRepositoryImpl implements MessageRepository {
 	public List<Message> getMessagesGlobal() {
 		return rt_hashOps.values(KEY_LIST_MESSAGE_GLOBAL);
 	}
+
+	@Override
+	public long countGlobalMessages() {
+	    return srt_listOps.size(KEY_LIST_MESSAGE_GLOBAL);
+    }
+
+    @Override
+    public long countTimelineMessages(String u_id) {
+	    return srt_listOps.size(KEY_LIST_MESSAGE_USER + u_id);
+    }
 
     /**
      * Gets all message ID's of user from userID from last to first (n -> 1).

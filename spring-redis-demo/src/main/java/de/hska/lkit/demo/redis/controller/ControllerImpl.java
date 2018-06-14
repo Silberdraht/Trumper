@@ -54,25 +54,12 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
 
-            List<String> retrievedMessages = messageRepository.getMessageIsDsAll();
             int offset = (page - 1) * pagelength;
-            List<Message> pagedMessages = new ArrayList<>();
-
-            int j;
-            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
-                j = retrievedMessages.size() - i - 1;
-                if (j >= offset) {
-                    if (j < offset + pagelength) {
-                        String m_id = retrievedMessages.get(j);
-                        pagedMessages.add(messageRepository.getMessage(m_id));
-                    } else {
-                        break; //for performance
-                    }
-                }
-            }
+            List<Message> pagedMessages;
+            pagedMessages = messageRepository.getMessagesInRange(offset,offset+pagelength-1, messageRepository);
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
-            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+            long pagesRequired = (int) Math.ceil((float) messageRepository.countGlobalMessages() / pagelength);
             if (pagesRequired <= 0) {
                 pagesRequired = 1;
             }
@@ -85,7 +72,7 @@ public class ControllerImpl {
 
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
-    public String postMessage(@ModelAttribute Message message, @ModelAttribute("querry") Message querry,
+    public String postMessage(@ModelAttribute Message message,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
@@ -206,7 +193,8 @@ public class ControllerImpl {
 
     //needed for getUserWithoutName, preventing Error-Pages - also for /searchuser call
     @RequestMapping(value = "/searchusers", method = RequestMethod.GET)
-    public String foundUser(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+    public String foundUser(HttpServletRequest req, HttpServletResponse res, Model model,
+                                 @ModelAttribute("querry") Message querry) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             return searchUser(new Message("","","",""),req,res,model);
         }
@@ -268,26 +256,12 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
 
-            List<String> retrievedMessages = messageRepository.getMessageIDsTimeline(SimpleSecurity.getUid());
-            //List<Message> retrievedMessages = messageRepository.getMessagesTimeline(SimpleSecurity.getUid());
-            //retrievedMessages.sort((Message m1, Message m2) -> m2.getId().compareTo(m1.getId()));
             int offset = (page - 1) * pagelength;
-            List<Message> pagedMessages = new ArrayList<>();
-
-            int j;
-            for (int i = retrievedMessages.size() - 1; i >= 0; i--) {
-                j = retrievedMessages.size() - i - 1;
-                if (j >= offset) {
-                    if (j < offset + pagelength) {
-                        pagedMessages.add(messageRepository.getMessage(retrievedMessages.get(j))); //TODO check order
-                    } else {
-                        break; //for performance
-                    }
-                }
-            }
+            List<Message> pagedMessages;
+            pagedMessages = messageRepository.getMessagesInRange(SimpleSecurity.getUid(), offset,offset+pagelength-1, messageRepository);
             model.addAttribute("current", page);
             model.addAttribute("messages", pagedMessages);
-            int pagesRequired = (int) Math.ceil((float) retrievedMessages.size() / pagelength);
+            long pagesRequired = (long) Math.ceil((float) messageRepository.countTimelineMessages(SimpleSecurity.getUid()) / pagelength);
             if (pagesRequired == 0) {
                 pagesRequired = 1;
             }
