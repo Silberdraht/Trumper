@@ -6,10 +6,12 @@ import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 
+import de.hska.lkit.demo.redis.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisServerCommands;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -37,7 +39,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 	private static final String KEY_FOLLOWING_USER = "m:following:";
 
-	/**
+    private final UserRepository userRepository;
+
+    /**
 	 * to generate unique ids for message
 	 */
 	private RedisAtomicLong m_id;
@@ -52,7 +56,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 	 */
 	private RedisTemplate<String, Object> redisTemplate;
 
-	/**
+    private final SimpMessagingTemplate messagingTemplate;
+
+    /**
 	 * for simple value Operations
 	 */
 
@@ -86,11 +92,13 @@ public class MessageRepositoryImpl implements MessageRepository {
 
 
 	@Autowired
-	public MessageRepositoryImpl(RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate) {
+	public MessageRepositoryImpl(UserRepository userRepository, RedisTemplate<String, Object> redisTemplate, StringRedisTemplate stringRedisTemplate, SimpMessagingTemplate messagingTemplate) {
+		this.userRepository = userRepository;
 		this.redisTemplate = redisTemplate;
 		this.stringRedisTemplate = stringRedisTemplate;
 		this.m_id = new RedisAtomicLong("m_id", stringRedisTemplate.getConnectionFactory());
-	}
+        this.messagingTemplate = messagingTemplate;
+    }
 	
 	@PostConstruct
 	private void init() {
@@ -116,7 +124,25 @@ public class MessageRepositoryImpl implements MessageRepository {
 	}
 
 	@Override
-	public Message postMessage(String text, Map<String, User> followers) {
+    public void post(String m_key) {
+        Message message = rt_hashOps.get(KEY_LIST_MESSAGE_GLOBAL, m_key);
+        String autorID = userRepository.getIdByName(message.getAutor());
+        User autor = userRepository.getUserById(autorID);
+        Map<String, User> followers = userRepository.getFollowers(autorID);
+
+        if (autor.isOnline()) {
+            messagingTemplate.convertAndSend("/newMessage/" + autor.getUsername(), message); //websocket
+        }
+
+        for (User follower :followers.values()) {
+            if (follower.isOnline()) {
+                messagingTemplate.convertAndSend("/newMessage/" + follower.getUsername(), message); //websocket
+            }
+        }
+    }
+
+	@Override
+	public Message postMessage(String text) {
 
 		String m_id = String.valueOf(this.m_id.incrementAndGet());
         String u_id = SimpleSecurity.getUid();
@@ -156,9 +182,11 @@ public class MessageRepositoryImpl implements MessageRepository {
         }*/
         //add message to all follower lists
         //here is the Redis.publish to use for signaling incoming message in followers session
+        Map<String, User> followers = userRepository.getFollowers(u_id);
         for (User follower : followers.values()) {
             srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + getIDByKey(follower.getId()), key);
-        }
+		}
+        redisTemplate.convertAndSend("tweetReceived", key);
         return message;
     }
 
@@ -182,6 +210,7 @@ public class MessageRepositoryImpl implements MessageRepository {
      * @param end
      * @return
      */
+    @Override
 	public List<String> getMessageIDsInRange(int start, int end) {
         return srt_listOps.range(KEY_LIST_MESSAGE_GLOBAL, start, end);
     }

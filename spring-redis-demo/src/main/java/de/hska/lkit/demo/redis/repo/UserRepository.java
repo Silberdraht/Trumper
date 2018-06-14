@@ -52,7 +52,7 @@ public interface UserRepository {
 
 	public String getIdByName(String name);
 
-    public User getUserById(String key);
+    public User getUserById(String u_id);
 
 	public String getPassword(String u_id);
 

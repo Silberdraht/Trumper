@@ -6,7 +6,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String u_id;
-	private String online;
+	private boolean online;
 	private String name;
 	private String password;
 
@@ -39,12 +39,12 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	public String getOnline() {
+	public boolean isOnline() {
 		return online;
 	}
 
-	public void setOnline(String firstname) {
-		this.online = online;
+	public void setOnline(boolean isOnline) {
+		this.online = isOnline;
 	}
 
 

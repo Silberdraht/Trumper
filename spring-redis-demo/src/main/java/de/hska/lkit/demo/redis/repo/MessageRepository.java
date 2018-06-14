@@ -10,9 +10,13 @@ public interface MessageRepository {
 
     public Message getMessage(String id);
 
-    public Message postMessage(String text, Map<String, User> followers);
+    void post(String m_key);
+
+    public Message postMessage(String text);
 
     public List<String> getMessageIsDsAll();
+
+    List<String> getMessageIDsInRange(int start, int end);
 
     public List<Message> getMessagesGlobal();
 
