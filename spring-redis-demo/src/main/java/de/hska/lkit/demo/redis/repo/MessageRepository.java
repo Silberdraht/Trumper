@@ -10,23 +10,15 @@ public interface MessageRepository {
 
     public Message getMessage(String id);
 
-    public Message postMessage(String text, Map<String, User> followers);
+    void post(String m_key);
+
+    public Message postMessage(String text);
 
     public List<String> getMessageIsDsAll();
 
     List<String> getMessageIDsInRange(int start, int end);
 
-    List<String> getMessageIDsInRange(String userID, int start, int end);
-
-    List<Message> getMessagesInRange(int start, int end, MessageRepository messageRepository);
-
-    List<Message> getMessagesInRange(String userID, int start, int end, MessageRepository messageRepository);
-
     public List<Message> getMessagesGlobal();
-
-    long countGlobalMessages();
-
-    long countTimelineMessages(String u_id);
 
     public List<String> getMessageIDsUser(String user);
 

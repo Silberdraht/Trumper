@@ -2,23 +2,24 @@ package de.hska.lkit.demo.redis.model.Impl;
 
 import de.hska.lkit.demo.redis.model.MessagePublisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 public class RedisMessagePublisher implements MessagePublisher {
 
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private SimpMessagingTemplate messagingTemplate;
 
     public RedisMessagePublisher() {
     }
 
     public RedisMessagePublisher(
-            RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+            SimpMessagingTemplate redisTemplate) {
+        this.messagingTemplate = redisTemplate;
     }
 
-    public void publish(String message) {
-        redisTemplate.convertAndSend("/own_messages", message);
+    @Override
+    public void publish(Message message) {
+        messagingTemplate.convertAndSend("addmessage", message);
     }
+
 }

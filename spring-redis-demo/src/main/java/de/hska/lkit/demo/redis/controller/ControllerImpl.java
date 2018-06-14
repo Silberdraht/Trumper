@@ -1,7 +1,7 @@
 package de.hska.lkit.demo.redis.controller;
 
 import de.hska.lkit.demo.redis.model.Impl.Message;
-import de.hska.lkit.demo.redis.model.Impl.RedisMessageSubscriber;
+import de.hska.lkit.demo.redis.model.Impl.RedisMessagePublisher;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
@@ -39,7 +39,6 @@ public class ControllerImpl {
 
     public ControllerImpl(MessageRepository messageRepository, UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
         super();
-
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.simpleCookieInterceptor = simpleCookieInterceptor;
@@ -91,17 +90,17 @@ public class ControllerImpl {
 
 
     @MessageMapping("/messages/addmessage")
-    public void post(Message postedMessage) throws Exception {
-        messagingTemplate.convertAndSend("/own_messages", postedMessage);
+    public void post(Message postedMessage) {
+        RedisMessagePublisher redisMessagePublisher = new RedisMessagePublisher(messagingTemplate);
+        redisMessagePublisher.publish(postedMessage);
     }
 
     @RequestMapping(value = "/messages/addmessage", method = RequestMethod.POST)
     public String postMessage(@ModelAttribute Message message, @ModelAttribute("querry") Message querry,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            Message postMessage = messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
-            RedisMessageSubscriber redisMessageSubscriber = new RedisMessageSubscriber();
-            redisMessageSubscriber.onMessage(postMessage.getText(),);
+            Message postMessage = messageRepository.postMessage(message.getText());
+
             return "redirect:/messages";
         }
         return "redirect:/login";
@@ -163,8 +162,8 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-
-            return "redirect:/messages?";
+            userRepository.getUser(user.getUsername()).setOnline(true);
+            return "redirect:/messages?page=1";
 
         } else {
             if (userRepository.auth(user.getUsername(), user.getPassword())) {
@@ -172,7 +171,7 @@ public class ControllerImpl {
                 Cookie cookie = new Cookie("auth", auth);
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
-
+                userRepository.getUser(user.getUsername()).setOnline(true);
 
                 return "redirect:/messages?page=1";
             }
@@ -267,6 +266,7 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
             userRepository.deleteAuth(name);
+            userRepository.getUser(name).setOnline(false);
         }
         return "redirect:/login";
     }
