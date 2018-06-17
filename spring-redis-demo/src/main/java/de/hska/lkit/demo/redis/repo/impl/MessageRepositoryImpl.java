@@ -164,9 +164,9 @@ public class MessageRepositoryImpl implements MessageRepository {
 		//global timeline message ID's (all)
 		srt_listOps.leftPush(KEY_LIST_MESSAGE_GLOBAL, key);
         //own timeline messages (own + following)
-        srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + u_id, key);
+        srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + u_id, key);   //TWICE?
         //only own message ID's
-		srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + u_id, key);
+		//srt_listOps.leftPush(KEY_LIST_MESSAGE_USER + u_id, key);   //^ ???
 
 		//global timeline messages (all)
 		rt_hashOps.put(KEY_LIST_MESSAGE_GLOBAL, key, message);
@@ -231,7 +231,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public List<Message> getMessagesInRange(String userID,int start, int end, MessageRepository messageRepository) {
+    public List<Message> getMessagesInRange(String userID, int start, int end, MessageRepository messageRepository) {
         List<String> ids = getMessageIDsInRange(userID, start, end);
         List<Message> messages = new ArrayList<>();
         for (String id : ids) {
