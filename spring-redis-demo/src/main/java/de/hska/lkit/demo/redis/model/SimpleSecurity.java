@@ -17,7 +17,6 @@ public abstract class SimpleSecurity {
     }
     public static boolean isUserSignedIn(String name) {
         UserInfo userInfo = user.get();
-        System.out.println(userInfo.name);
         return userInfo != null && userInfo.name.equals(name);
     }
     public static boolean isSignedIn() {
