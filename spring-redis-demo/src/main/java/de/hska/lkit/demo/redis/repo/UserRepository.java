@@ -3,6 +3,7 @@ package de.hska.lkit.demo.redis.repo;
 
 import de.hska.lkit.demo.redis.model.User;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +41,7 @@ public interface UserRepository {
 	 * @param characters
 	 * @return
 	 */
-	public Map<String, User> findUsersWith(String characters);
+	public List<User> findUsersWith(String characters);
 
 	/**
 	 * return the number of all users

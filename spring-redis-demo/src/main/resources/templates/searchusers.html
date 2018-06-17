@@ -69,11 +69,13 @@
                     <div class="col-lg-6 col-m-6 col-sm-6 col-xs-6">
                         <h4 th:text="Follow-Status"></h4>
                             <div class="panel panel-default" th:each="element, iter : ${users}">
-                                <form class="form" th:if="!${isFollowing[iter.index]}" th:action="@{/searchuser/follow}" method="post">
-                                    <button class="btn btn-error" th:type="submit" th:text="Follow" th:value="${element.username}" name="element"></button>
-                                    <div>(You aren't following this user.)</div>
+                                <form class="form" th:if="!${isFollowing[iter.index]}" th:action="@{/searchusers/follow}" method="post">
+                                    <button class="btn btn-error" th:type="submit" th:text="Follow" th:value="${element.username}" name="element"
+                                            th:classappend="${element.username.equals(loggedOn) ? ' disabled' : ''}"></button>
+                                    <div th:if="${!element.username.equals(loggedOn)}">(You aren't following this user.)</div>
+                                    <div th:if="${element.username.equals(loggedOn)}">(This is your account.)</div>
                                 </form>
-                                <form class="form" th:if="${isFollowing[iter.index]}" th:action="@{/searchuser/unfollow}" method="post">
+                                <form class="form" th:if="${isFollowing[iter.index]}" th:action="@{/searchusers/unfollow}" method="post">
                                     <button class="btn btn-success" th:type="submit" th:text="Following" th:value="${element.username}" name="element"></button>
                                     <div>(You are following this user. Nice!)</div>
                                 </form>

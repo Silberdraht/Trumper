@@ -159,14 +159,31 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
 	@Override
-	public Map<String, User> findUsersWith(String pattern) {
+	public List<User> findUsersWith(String pattern) {
 
-		Set<byte[]> result = null;
-		Map<String, User> mapResult = new HashMap<String, User>();
+		List<User> results = new ArrayList<>();
 
-		if (pattern.equals("")){
+		if (pattern.equals("") || pattern.trim().equals("")){
 
-			mapResult = rt_hashOps.entries(KEY_HASH_ALL_USERS);
+			results.addAll(rt_hashOps.entries(KEY_HASH_ALL_USERS).values());
+			results.sort(new Comparator<User>() {
+
+				@Override
+				public int compare(User o1, User o2) {
+					char[] o1_chars = o1.getUsername().toCharArray();
+					char[] o2_chars = o2.getUsername().toCharArray();
+					int len = o1_chars.length > o2_chars.length ? o2_chars.length : o1_chars.length;
+					for (int i = 0; len > i; i++) {
+						if (o1_chars[i] > o2_chars[i]) {
+							return 1;
+						}
+						else if (o1_chars[i] < o2_chars[i]) {
+							return -1;
+						}
+					}
+					return 0;
+				}
+			});
 	
 		} else {
 
@@ -178,13 +195,12 @@ public class UserRepositoryImpl implements UserRepository {
 			for (Iterator iterator = sresult.iterator(); iterator.hasNext();) {
 				String username = (String) iterator.next();
 				User user = rt_hashOps.get(KEY_HASH_ALL_USERS, KEY_PREFIX_USER + username);
-	
-				mapResult.put(user.getUsername(), user);
+	            results.add(user);
 			}
 
 		}
 		
-		return mapResult;
+		return results;
 
 	}
 
