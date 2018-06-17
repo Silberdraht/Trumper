@@ -83,7 +83,7 @@ public class ControllerImpl {
     }
 
 
-    @RequestMapping(value = "/searchuser/follow", method = RequestMethod.POST)
+    @RequestMapping(value = "/searchusers/follow", method = RequestMethod.POST)
     public String addFollow(Model model, HttpServletResponse response, HttpServletRequest request,
                             @ModelAttribute User user,
                             @RequestParam String element) throws Exception {
@@ -91,24 +91,26 @@ public class ControllerImpl {
             String followedUserID = userRepository.getIdByName(element);
             userRepository.followUser(SimpleSecurity.getUid(), followedUserID);
             //messageRepository.followMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
-            return "redirect:/messages";
+            return "redirect:/searchusers"; //return "redirect:/messages";
         }
 
         return "redirect:/login";
 
     }
 
-    @RequestMapping(value = "/searchuser/unfollow", method = RequestMethod.POST)
+    @RequestMapping(value = "/searchusers/unfollow", method = RequestMethod.POST)
     public String unfollow(Model model, HttpServletResponse response, HttpServletRequest request,
                            @ModelAttribute User user,
+                           //@ModelAttribute ArrayList<User> users,
+                           //@ModelAttribute ArrayList<Boolean> isFollowing,
                            @RequestParam String element) throws Exception {
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
+
             //String followedUserID = userRepository.getIdByName(element);
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(element));
             //messageRepository.unfollowMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
-
-            return "redirect:/messages";
+            return "redirect:/searchusers";
         }
 
         return "redirect:/login";
@@ -214,9 +216,10 @@ public class ControllerImpl {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
 
             String uid = SimpleSecurity.getUid();
-            List<User> retrievedUsers = new ArrayList<>();
+            List<User> retrievedUsers;
             List<Boolean> isFollowing = new ArrayList<>();
-            retrievedUsers.addAll(userRepository.findUsersWith(querry.getText()).values());
+            //retrievedUsers.addAll(userRepository.findUsersWith(querry.getText()).values());
+            retrievedUsers = userRepository.findUsersWith(querry.getText());
             Map<String, User> following = userRepository.getFollowing(uid);
             for (User user : retrievedUsers) {
                 String name = user.getUsername();
