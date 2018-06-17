@@ -150,7 +150,6 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public User getUserById(String u_id) {
         User user = new User();
-        System.out.println("This is the UID given to getUserById: " + u_id);
         //u_id is 'key'
         user.setId(srt_hashOps.get(u_id, "u_id"));
         user.setUsername(srt_hashOps.get(u_id, "username"));
@@ -229,7 +228,6 @@ public class UserRepositoryImpl implements UserRepository {
 	public Map<String, User> getFollowing(String id) {
 
 		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWING_USER + id);
-        System.out.println("Size of Following in UserRepoImpl  " + user.size());
         Map<String, User> mapUser = new HashMap<>();
 		for (Object s : user) {
 			mapUser.put(getUserById(s.toString()).getUsername(), getUserById(s.toString()));
@@ -242,7 +240,6 @@ public class UserRepositoryImpl implements UserRepository {
 	public Map<String, User> getFollowers(String id) {
 
 		Set<Object> user = redisTemplate.opsForSet().members(KEY_FOLLOWERS_USER + KEY_PREFIX_USER + id);
-        System.out.println("Size of Followers in UserRepoImpl  " + user.size());
 		Map<String, User> mapUser = new HashMap<>();
 		for (Object s : user) {
             mapUser.put(getUserById(KEY_PREFIX_USER + s.toString()).getUsername(), getUserById(KEY_PREFIX_USER + s.toString()));
@@ -274,9 +271,9 @@ public class UserRepositoryImpl implements UserRepository {
 		String KEY_AUTH_POST = ":auth";
 		stringRedisTemplate.boundHashOps(KEY_UID + KEY_PREFIX_USER + uid + KEY_AUTH_POST).put("auth", auth);
 		stringRedisTemplate.expire(KEY_UID + KEY_PREFIX_USER + uid + KEY_AUTH_POST, timeout, tUnit);
-		System.out.println(KEY_UID + KEY_PREFIX_USER + uid + KEY_AUTH_POST);
+		//System.out.println(KEY_UID + KEY_PREFIX_USER + uid + KEY_AUTH_POST);
 		String KEY_AUTH_PRE = "auth:";
-		System.out.println(KEY_AUTH_PRE + auth + ":uid");
+		//System.out.println(KEY_AUTH_PRE + auth + ":uid");
 		stringRedisTemplate.opsForValue().set(KEY_AUTH_PRE + auth + ":uid", uid, timeout, tUnit);
 
 		System.out.println("Pass addAuth");
