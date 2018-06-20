@@ -58,7 +58,8 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            model.addAttribute("loggedOn", SimpleSecurity.getName());
+            String userName = SimpleSecurity.getName();
+            model.addAttribute("loggedOn", userName);
 
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages;
@@ -70,23 +71,23 @@ public class ControllerImpl {
                 pagesRequired = 1;
             }
             model.addAttribute("size", pagesRequired);
-            return "/messages";
+            return "messages";
         }
         return "redirect:/login";
     }
 
 
-    @MessageMapping("/messages/addmessage")
+    /*@MessageMapping("/messages/addmessage")
     public void post(Message postedMessage) {
         RedisMessagePublisher redisMessagePublisher = new RedisMessagePublisher(messagingTemplate);
         redisMessagePublisher.publish(postedMessage);
-    }
+    }*/
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
     public String postMessage(@ModelAttribute Message message,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            Message postMessage = messageRepository.postMessage(message.getText());
+            messageRepository.postMessage(message.getText());
 
             return "redirect:/messages";
         }
@@ -130,7 +131,6 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        //boolean test = simpleCookieInterceptor.preHandle(request, response, model);
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             return "redirect:/messages";
@@ -151,7 +151,6 @@ public class ControllerImpl {
                 }
 
             userRepository.saveUser(user);
-            userRepository.getUser(user.getUsername()).setOnline(true);
             return "redirect:/messages?page=1";
 
         } else {
@@ -160,8 +159,8 @@ public class ControllerImpl {
                 Cookie cookie = new Cookie("auth", auth);
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
-                userRepository.getUser(user.getUsername()).setOnline(true);
-
+                userRepository.setUserOnline(userRepository.getIdByName(user.getUsername()), true);
+                System.out.println("getAllUsersLogin: " + user.getUsername());
                 return "redirect:/messages?page=1";
             }
         }
@@ -256,8 +255,8 @@ public class ControllerImpl {
 
         if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
+            userRepository.setUserOnline(SimpleSecurity.getUid(), false);
             userRepository.deleteAuth(name);
-            userRepository.getUser(name).setOnline(false);
         }
         return "redirect:/login";
     }

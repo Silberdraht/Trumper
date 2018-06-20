@@ -15,8 +15,12 @@ public interface UserRepository {
 	 * @param user
 	 */
 	public void saveUser(User user);
-	
-	
+
+
+    void setUserOnline(String userName, boolean isOnline);
+
+	boolean isUserOnline(String u_id);
+
 	/**
 	 * returns a list of all users
 	 * 

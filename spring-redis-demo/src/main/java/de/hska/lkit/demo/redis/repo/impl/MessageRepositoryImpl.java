@@ -131,12 +131,16 @@ public class MessageRepositoryImpl implements MessageRepository {
         Map<String, User> followers = userRepository.getFollowers(autorID);
 
         if (autor.isOnline()) {
-            messagingTemplate.convertAndSend("/newMessage/" + autor.getUsername(), message); //websocket
+            messagingTemplate.convertAndSend("/newMessages/" + autor.getUsername(), message); //websocket
+			System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to autor");
         }
 
-        for (User follower :followers.values()) {
+        for (User follower : followers.values()) {
             if (follower.isOnline()) {
-                messagingTemplate.convertAndSend("/newMessage/" + follower.getUsername(), message); //websocket
+                messagingTemplate.convertAndSend("/newMessages/" + follower.getUsername(), message); //websocket
+                System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to follower: " + follower.getUsername() + " who is online.");
+            } else {
+                System.out.println("MessageRepositoryImpl:post(m_key) : message not sent to follower: " + follower.getUsername() + " because he is not online.");
             }
         }
     }

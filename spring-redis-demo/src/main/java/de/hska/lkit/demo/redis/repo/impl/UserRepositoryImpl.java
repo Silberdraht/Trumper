@@ -122,6 +122,25 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void setUserOnline(String u_id, boolean isOnline) {
+        System.out.println("setUserOnline: " + u_id);
+        if(!u_id.startsWith(KEY_PREFIX_USER)) {
+            u_id = KEY_PREFIX_USER + u_id;
+        }
+        srt_hashOps.put(KEY_PREFIX_USER + u_id, "online", isOnline + "");
+    }
+
+    @Override
+    public boolean isUserOnline(String u_id) {
+        System.out.println("setUserOnline: " + u_id);
+        if(!u_id.startsWith(KEY_PREFIX_USER)) {
+            u_id = KEY_PREFIX_USER + u_id;
+        }
+        String online = srt_hashOps.get(KEY_PREFIX_USER + u_id, "online");
+        return "true".equals(online);
+    }
+
+    @Override
     public Map<String, User> getAllUsers() {
         return rt_hashOps.entries(KEY_HASH_ALL_USERS);
     }
@@ -145,6 +164,7 @@ public class UserRepositoryImpl implements UserRepository {
         user.setId(srt_hashOps.get(u_id, "u_id"));
         user.setUsername(srt_hashOps.get(u_id, "username"));
         user.setPassword(srt_hashOps.get(u_id, "password"));
+        user.setOnline(isUserOnline(u_id));
         return user;
     }
 

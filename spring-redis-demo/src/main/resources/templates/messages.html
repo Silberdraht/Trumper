@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Trumper</title>
     <meta charset="utf-8" />
@@ -17,6 +17,8 @@
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+        <var id="currentUser" th:utext="${loggedOn}"/>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
@@ -61,7 +63,7 @@
             <div class="panel-heading"><h2>Global News Timeline</h2></div>
 
             <div class="panel-body">
-                <form id="messages" class="form" th:action="@{/messages/addmessage}"
+                <form class="form" th:action="@{/messages/addmessage}"
                       th:object="${message}" method="post">
                     <div class="form-group">
                         <label><input type="text" th:field="*{text}" placeholder="Write some news.."/></label>
@@ -84,15 +86,7 @@
                 </div>
 
             </div>
-            <!--
-            <a href="#" title="Dismissible popover" data-toggle="popover"
-               data-trigger="focus" data-content="You have news!">Popup-Test</a>
-            <script>
-                $(document).ready(function(){
-                    $('[data-toggle="popover"]').popover();
-                });
-            </script>
-            -->
+            <div id="newMsg"></div>
 
             <nav aria-label="Page navigation">
                 <ul class="pagination">
@@ -126,7 +120,9 @@
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-<script src="../static/img/stomp.js"></script>
+    <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+    <script src="../javascript/stomp.js"></script>
+<script src="/webjars/stomp-websocket/stomp.min.js"></script>
 </body>
 
 </html>

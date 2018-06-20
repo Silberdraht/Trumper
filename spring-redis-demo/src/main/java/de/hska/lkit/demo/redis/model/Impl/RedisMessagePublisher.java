@@ -19,7 +19,8 @@ public class RedisMessagePublisher implements MessagePublisher {
 
     @Override
     public void publish(Message message) {
-        messagingTemplate.convertAndSend("addmessage", message);
+        messagingTemplate.convertAndSend("own_messages" /*Todo*/, message);
+        System.out.println("RedisMessagePublisher: message sent");
     }
 
 }

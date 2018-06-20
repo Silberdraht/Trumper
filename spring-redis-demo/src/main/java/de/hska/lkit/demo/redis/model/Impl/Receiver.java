@@ -14,8 +14,8 @@ public class Receiver {
 
     public void receiveMessage(String m_key) {
         System.out.println(m_key);
-        String[] split = m_key.split("m");
-        m_key = "m" + split[split.length - 1];
+        String[] split = m_key.split("m:");
+        m_key = "m:" + split[split.length - 1];
         System.out.println(m_key);
         messageRepository.post(m_key);
     }

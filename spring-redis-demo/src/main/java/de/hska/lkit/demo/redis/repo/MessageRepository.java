@@ -18,8 +18,6 @@ public interface MessageRepository {
 
     List<String> getMessageIDsInRange(int start, int end);
 
-    List<String> getMessageIDsInRange(int start, int end);
-
     List<String> getMessageIDsInRange(String userID, int start, int end);
 
     List<Message> getMessagesInRange(int start, int end, MessageRepository messageRepository);
