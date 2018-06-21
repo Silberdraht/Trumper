@@ -163,7 +163,9 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public User getUserById(String u_id) {
         User user = new User();
-        u_id = KEY_PREFIX_USER + u_id;
+        if(!u_id.startsWith(KEY_PREFIX_USER)) {
+            u_id = KEY_PREFIX_USER + u_id;
+        }
         user.setId(srt_hashOps.get(u_id, "u_id"));
         user.setUsername(srt_hashOps.get(u_id, "username"));
         user.setPassword(srt_hashOps.get(u_id, "password"));
