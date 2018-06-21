@@ -142,10 +142,11 @@ public class ControllerImpl {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
+
         if (send.equals("register")) {
 
             for (User u : retrievedUsers.values())
-                if (u.getUsername().equals(user.getUsername())) {
+                if (u.getUsername().toLowerCase().equals(user.getUsername().toLowerCase())) {
                     //TO-DO Give some form of feedback, ie popup, that registering was not successful due to already existing user
                     return "redirect:/login";
                 }

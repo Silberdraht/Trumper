@@ -107,6 +107,8 @@ public class UserRepositoryImpl implements UserRepository {
         srt_hashOps.put(key, "username", username);
         srt_hashOps.put(key, "password", user.getPassword());
 
+        username = username.toLowerCase();
+
         // the key for a new user is added to the set for all usernames
         srt_setOps.add(KEY_SET_ALL_USERNAMES, username);
 
@@ -147,7 +149,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User getUser(String username) {
-
+		username = username.toLowerCase();
         // if username is in set with all usernames
         if (srt_setOps.isMember(KEY_SET_ALL_USERNAMES, username)) {
 
@@ -161,6 +163,7 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public User getUserById(String u_id) {
         User user = new User();
+        u_id = KEY_PREFIX_USER + u_id;
         user.setId(srt_hashOps.get(u_id, "u_id"));
         user.setUsername(srt_hashOps.get(u_id, "username"));
         user.setPassword(srt_hashOps.get(u_id, "password"));
@@ -170,7 +173,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public List<User> findUsersWith(String pattern) {
-
+		pattern = pattern.toLowerCase();
 		List<User> results = new ArrayList<>();
 
 		if (pattern.equals("") || pattern.trim().equals("")){
@@ -221,7 +224,8 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public String getIdByName(String name) {
-		if(srt_simpleOps.get(name) != null) {
+		name = name.toLowerCase();
+    	if(srt_simpleOps.get(name) != null) {
 		    return srt_simpleOps.get(name);
 
 		} else
