@@ -162,10 +162,10 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public User getUserById(String u_id) {
-        User user = new User();
         if(!u_id.startsWith(KEY_PREFIX_USER)) {
             u_id = KEY_PREFIX_USER + u_id;
         }
+        User user = new User();
         user.setId(srt_hashOps.get(u_id, "u_id"));
         user.setUsername(srt_hashOps.get(u_id, "username"));
         user.setPassword(srt_hashOps.get(u_id, "password"));
@@ -181,24 +181,20 @@ public class UserRepositoryImpl implements UserRepository {
 		if (pattern.equals("") || pattern.trim().equals("")){
 
 			results.addAll(rt_hashOps.entries(KEY_HASH_ALL_USERS).values());
-			results.sort(new Comparator<User>() {
-
-				@Override
-				public int compare(User o1, User o2) {
-					char[] o1_chars = o1.getUsername().toCharArray();
-					char[] o2_chars = o2.getUsername().toCharArray();
-					int len = o1_chars.length > o2_chars.length ? o2_chars.length : o1_chars.length;
-					for (int i = 0; len > i; i++) {
-						if (o1_chars[i] > o2_chars[i]) {
-							return 1;
-						}
-						else if (o1_chars[i] < o2_chars[i]) {
-							return -1;
-						}
-					}
-					return 0;
-				}
-			});
+			results.sort((o1, o2) -> {
+                char[] o1_chars = o1.getUsername().toCharArray();
+                char[] o2_chars = o2.getUsername().toCharArray();
+                int len = o1_chars.length > o2_chars.length ? o2_chars.length : o1_chars.length;
+                for (int i = 0; len > i; i++) {
+                    if (o1_chars[i] > o2_chars[i]) {
+                        return 1;
+                    }
+                    else if (o1_chars[i] < o2_chars[i]) {
+                        return -1;
+                    }
+                }
+                return 0;
+            });
 	
 		} else {
 

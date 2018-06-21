@@ -60,6 +60,7 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             String userName = SimpleSecurity.getName();
             model.addAttribute("loggedOn", userName);
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages;
@@ -180,7 +181,7 @@ public class ControllerImpl {
     public String getOneUser(@PathVariable("username") String username, Model model, HttpServletResponse res, HttpServletRequest req) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
-
+            model.addAttribute("user_id", SimpleSecurity.getUid());
             User found = userRepository.getUser(username);
             String name = found.getUsername();
             String id = userRepository.getIdByName(name);
@@ -226,6 +227,7 @@ public class ControllerImpl {
     public String searchUser(@ModelAttribute("querry") Message querry, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             String uid = SimpleSecurity.getUid();
             List<User> retrievedUsers;
@@ -271,6 +273,7 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages;

@@ -130,17 +130,16 @@ public class MessageRepositoryImpl implements MessageRepository {
         User autor = userRepository.getUserById(autorID);
         Map<String, User> followers = userRepository.getFollowers(autorID);
 
-        if (autor.isOnline()) {
-            messagingTemplate.convertAndSend("/newMessages/" + autor.getUsername(), message); //websocket
-			System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to autor");
-        }
+        messagingTemplate.convertAndSend("/newMessages/" + autor.getId(), message); //websocket
+        System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to /newMessages/" + autor.getId());
+
 
         for (User follower : followers.values()) {
             if (follower.isOnline()) {
-                messagingTemplate.convertAndSend("/newMessages/" + follower.getUsername(), message); //websocket
-                System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to follower: " + follower.getUsername() + " who is online.");
+                messagingTemplate.convertAndSend("/newMessages/" + follower.getId(), message); //websocket
+                System.out.println("MessageRepositoryImpl:post(m_key) : message sent via stomp to /newMessages/" + follower.getId() + " who is online.");
             } else {
-                System.out.println("MessageRepositoryImpl:post(m_key) : message not sent to follower: " + follower.getUsername() + " because he is not online.");
+                System.out.println("MessageRepositoryImpl:post(m_key) : message not sent to /newMessages/" + follower.getId() + " because he is not online.");
             }
         }
     }
