@@ -13,10 +13,6 @@ $(document).ready(function () {
                 //sendMessage(); not used right now
                 alert('New News that MAGA!');
                 console.log('alert');
-                //$('[data-toggle="popover"]').popover();
-                //document.getElementById("newMsg").innerText = "<p>You have updated news.</p>";
-                document.getElementById("newMsg").setAttribute(innerText, "You've got news!");
-                document.title = "1 Neue Nachricht!"
                 notify()
             });
         });
@@ -30,6 +26,7 @@ function notify() {
     // Let's check whether notification permissions have alredy been granted
     else if (Notification.permission === "granted") {
         // If it's okay let's create a notification
+        document.title = "New News!"
         var notification = new Notification("New News that MAGA!");
     }
 
@@ -38,13 +35,10 @@ function notify() {
         Notification.requestPermission(function (permission) {
             // If the user accepts, let's create a notification
             if (permission === "granted") {
+                document.title = "New News!"
                 var notification = new Notification("New News that MAGA!");
             }
         });
     }
 }
-    function sendMessage() {
-        var message = document.getElementById('message').value;
-        stompClient.send("/messages/addmessage", {}, JSON.stringify({'message': text}));
-    }
 })
