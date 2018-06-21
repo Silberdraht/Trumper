@@ -1,7 +1,7 @@
 package de.hska.lkit.demo.redis.repo;
 
-import de.hska.lkit.demo.redis.model.Impl.Message;
-import de.hska.lkit.demo.redis.model.Impl.User;
+import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.User;
 
 import java.util.List;
 import java.util.Map;
@@ -10,9 +10,7 @@ public interface MessageRepository {
 
     public Message getMessage(String id);
 
-    void post(String m_key);
-
-    public Message postMessage(String text);
+    public void postMessage(String text, Map<String, User> followers);
 
     public List<String> getMessageIsDsAll();
 
