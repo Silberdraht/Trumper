@@ -45,7 +45,7 @@ public class ControllerImpl {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index(Model model) {
+    public String index() {
         return "redirect:/login";
     }
 
@@ -87,7 +87,7 @@ public class ControllerImpl {
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
     public String postMessage(@ModelAttribute Message message,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        if (simpleCookieInterceptor.preHandle(request, response, model)) {
+        if (simpleCookieInterceptor.preHandle(request, response, model) && !message.getText().trim().equals("")) {
             messageRepository.postMessage(message.getText());
 
             return "redirect:/messages";
@@ -103,8 +103,7 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             String followedUserID = userRepository.getIdByName(element);
             userRepository.followUser(SimpleSecurity.getUid(), followedUserID);
-            //messageRepository.followMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
-            return "redirect:/searchusers"; //return "redirect:/messages";
+            return "redirect:/searchusers";
         }
 
         return "redirect:/login";
@@ -119,10 +118,7 @@ public class ControllerImpl {
                            @RequestParam String element) throws Exception {
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-
-            //String followedUserID = userRepository.getIdByName(element);
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(element));
-            //messageRepository.unfollowMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
             return "redirect:/searchusers";
         }
 
@@ -186,8 +182,6 @@ public class ControllerImpl {
             String name = found.getUsername();
             String id = userRepository.getIdByName(name);
 
-            //Map<String, User> followers = userRepository.getFollowers(id);
-            //Map<String, User> following = userRepository.getFollowing(id);
             model.addAttribute("userFound", name);
             model.addAttribute("followers", userRepository.getFollowers(id));
             model.addAttribute("following", userRepository.getFollowing(id));
