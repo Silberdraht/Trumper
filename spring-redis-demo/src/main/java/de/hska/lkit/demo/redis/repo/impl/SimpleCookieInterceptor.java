@@ -1,6 +1,7 @@
 
 package de.hska.lkit.demo.redis.repo.impl;
 
+import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;

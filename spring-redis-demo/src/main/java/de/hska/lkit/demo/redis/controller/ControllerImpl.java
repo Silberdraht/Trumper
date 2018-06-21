@@ -1,12 +1,15 @@
 package de.hska.lkit.demo.redis.controller;
 
-import de.hska.lkit.demo.redis.model.Message;
+import de.hska.lkit.demo.redis.model.Impl.Message;
+import de.hska.lkit.demo.redis.model.Impl.RedisMessagePublisher;
 import de.hska.lkit.demo.redis.model.SimpleSecurity;
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 import de.hska.lkit.demo.redis.repo.MessageRepository;
 import de.hska.lkit.demo.redis.repo.UserRepository;
 import de.hska.lkit.demo.redis.repo.impl.SimpleCookieInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+
 @org.springframework.stereotype.Controller
 public class ControllerImpl {
 
@@ -28,18 +32,20 @@ public class ControllerImpl {
     private final SimpleCookieInterceptor simpleCookieInterceptor;
 
     @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
     private static final Duration TIMEOUT = Duration.ofMinutes(15);
 
     public ControllerImpl(MessageRepository messageRepository, UserRepository userRepository, SimpleCookieInterceptor simpleCookieInterceptor) {
         super();
-
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.simpleCookieInterceptor = simpleCookieInterceptor;
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String index(Model model) {
+    public String index() {
         return "redirect:/login";
     }
 
@@ -52,7 +58,9 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            model.addAttribute("loggedOn", SimpleSecurity.getName());
+            String userName = SimpleSecurity.getName();
+            model.addAttribute("loggedOn", userName);
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages;
@@ -64,20 +72,25 @@ public class ControllerImpl {
                 pagesRequired = 1;
             }
             model.addAttribute("size", pagesRequired);
-            return "/messages";
+            return "messages";
         }
         return "redirect:/login";
     }
 
 
+    /*@MessageMapping("/messages/addmessage")
+    public void post(Message postedMessage) {
+        RedisMessagePublisher redisMessagePublisher = new RedisMessagePublisher(messagingTemplate);
+        redisMessagePublisher.publish(postedMessage);
+    }*/
 
     @RequestMapping(value = "messages/addmessage", method = RequestMethod.POST)
     public String postMessage(@ModelAttribute Message message,
                               Model model, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        if (simpleCookieInterceptor.preHandle(request, response, model)) {
-            messageRepository.postMessage(message.getText(), userRepository.getFollowers(SimpleSecurity.getUid()));
-            return "redirect:/messages";
+        if (simpleCookieInterceptor.preHandle(request, response, model) && !message.getText().trim().equals("")) {
+            messageRepository.postMessage(message.getText());
 
+            return "redirect:/messages";
         }
         return "redirect:/login";
     }
@@ -90,8 +103,7 @@ public class ControllerImpl {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             String followedUserID = userRepository.getIdByName(element);
             userRepository.followUser(SimpleSecurity.getUid(), followedUserID);
-            //messageRepository.followMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
-            return "redirect:/searchusers"; //return "redirect:/messages";
+            return "redirect:/searchusers";
         }
 
         return "redirect:/login";
@@ -106,10 +118,7 @@ public class ControllerImpl {
                            @RequestParam String element) throws Exception {
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
-
-            //String followedUserID = userRepository.getIdByName(element);
             userRepository.unfollowUser(SimpleSecurity.getUid(), userRepository.getIdByName(element));
-            //messageRepository.unfollowMessagesFromUser(SimpleSecurity.getUid(), followedUserID);
             return "redirect:/searchusers";
         }
 
@@ -119,7 +128,6 @@ public class ControllerImpl {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String getAllUsersLogin(Model model, @ModelAttribute("user") @Valid User user, HttpServletResponse response, HttpServletRequest request) throws Exception {
-        //boolean test = simpleCookieInterceptor.preHandle(request, response, model);
 
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             return "redirect:/messages";
@@ -131,16 +139,17 @@ public class ControllerImpl {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String getAllUsersLogin(@ModelAttribute("user") @Valid User user, @RequestParam String send, HttpServletResponse response, Model model) {
         Map<String, User> retrievedUsers = userRepository.getAllUsers();
+
         if (send.equals("register")) {
 
             for (User u : retrievedUsers.values())
-                if (u.getUsername().equals(user.getUsername())) {
+                if (u.getUsername().toLowerCase().equals(user.getUsername().toLowerCase())) {
                     //TO-DO Give some form of feedback, ie popup, that registering was not successful due to already existing user
                     return "redirect:/login";
                 }
 
             userRepository.saveUser(user);
-            return "redirect:/messages?";
+            return "redirect:/messages?page=1";
 
         } else {
             if (userRepository.auth(user.getUsername(), user.getPassword())) {
@@ -148,8 +157,8 @@ public class ControllerImpl {
                 Cookie cookie = new Cookie("auth", auth);
                 response.addCookie(cookie);
                 model.addAttribute("user", user.getUsername());
-
-
+                userRepository.setUserOnline(userRepository.getIdByName(user.getUsername()), true);
+                System.out.println("getAllUsersLogin: " + user.getUsername());
                 return "redirect:/messages?page=1";
             }
         }
@@ -168,13 +177,11 @@ public class ControllerImpl {
     public String getOneUser(@PathVariable("username") String username, Model model, HttpServletResponse res, HttpServletRequest req) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
-
+            model.addAttribute("user_id", SimpleSecurity.getUid());
             User found = userRepository.getUser(username);
             String name = found.getUsername();
             String id = userRepository.getIdByName(name);
 
-            //Map<String, User> followers = userRepository.getFollowers(id);
-            //Map<String, User> following = userRepository.getFollowing(id);
             model.addAttribute("userFound", name);
             model.addAttribute("followers", userRepository.getFollowers(id));
             model.addAttribute("following", userRepository.getFollowing(id));
@@ -214,6 +221,7 @@ public class ControllerImpl {
     public String searchUser(@ModelAttribute("querry") Message querry, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
         if (simpleCookieInterceptor.preHandle(req, res, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             String uid = SimpleSecurity.getUid();
             List<User> retrievedUsers;
@@ -244,6 +252,7 @@ public class ControllerImpl {
 
         if (simpleCookieInterceptor.preHandle(request, response, model) && SimpleSecurity.isSignedIn()) {
             String name = SimpleSecurity.getName();
+            userRepository.setUserOnline(SimpleSecurity.getUid(), false);
             userRepository.deleteAuth(name);
         }
         return "redirect:/login";
@@ -258,6 +267,7 @@ public class ControllerImpl {
                                  @RequestParam(defaultValue = "5") int pagelength) throws Exception {
         if (simpleCookieInterceptor.preHandle(request, response, model)) {
             model.addAttribute("loggedOn", SimpleSecurity.getName());
+            model.addAttribute("user_id", SimpleSecurity.getUid());
 
             int offset = (page - 1) * pagelength;
             List<Message> pagedMessages;

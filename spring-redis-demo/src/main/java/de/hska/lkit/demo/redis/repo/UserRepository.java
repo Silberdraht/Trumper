@@ -1,7 +1,7 @@
 package de.hska.lkit.demo.redis.repo;
 
 
-import de.hska.lkit.demo.redis.model.User;
+import de.hska.lkit.demo.redis.model.Impl.User;
 
 import java.util.List;
 import java.util.Map;
@@ -15,8 +15,12 @@ public interface UserRepository {
 	 * @param user
 	 */
 	public void saveUser(User user);
-	
-	
+
+
+    void setUserOnline(String userName, boolean isOnline);
+
+	boolean isUserOnline(String u_id);
+
 	/**
 	 * returns a list of all users
 	 * 
@@ -53,7 +57,7 @@ public interface UserRepository {
 
 	public String getIdByName(String name);
 
-    public User getUserById(String key);
+    public User getUserById(String u_id);
 
 	public String getPassword(String u_id);
 
